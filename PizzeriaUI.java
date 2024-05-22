@@ -8,14 +8,20 @@ public class PizzeriaUI extends JFrame {
 
     private JComboBox<String> pizzaComboBox;
     private JComboBox<String> userComboBox;
+    private JComboBox<String> sizeComboBox;
     private JTextArea orderSummaryTextArea;
     private JLabel pizzaPriceLabel;
     private JLabel userBalanceLabel;
 
+    private float finalPrice;
     private Database database;
+    private PizzeriaManagerUI commandManagerUI;
+    private DeliveryUI deliveryUI;
 
-    public PizzeriaUI(Database database) {
+    public PizzeriaUI(Database database, PizzeriaManagerUI commandManagerUI, DeliveryUI deliveryUI) {
         this.database = database;
+        this.commandManagerUI = commandManagerUI;
+        this.deliveryUI = deliveryUI;
         // Configurer la fenêtre principale
         setTitle("Pizzeria");
         setSize(400, 300);
@@ -31,6 +37,13 @@ public class PizzeriaUI extends JFrame {
             pizzas[i] = pizzaList.get(i).getName();
         }
         pizzaComboBox = new JComboBox<>(pizzas);
+
+        List<Taille> tailleList = database.getTailles(); // Get sizes from database
+        String[] tailles = new String[tailleList.size()];
+        for (int i = 0; i < tailleList.size(); i++) {
+            tailles[i] = tailleList.get(i).getNomTaille();
+        }
+        sizeComboBox = new JComboBox<>(tailles);
 
         JButton orderButton = new JButton("Passer commande");
         // Ajouter des action listeners
@@ -57,7 +70,14 @@ public class PizzeriaUI extends JFrame {
         pizzaComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updatePizzaPrice(pizzaList);
+                updatePizzaPrice(pizzaList, tailleList);
+            }
+        });
+
+        sizeComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updatePizzaPrice(pizzaList, tailleList);
             }
         });
 
@@ -83,49 +103,108 @@ public class PizzeriaUI extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
+        panel.add(new JLabel("Taille de la pizza:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(sizeComboBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panel.add(new JLabel("Prix de la pizza:"), gbc);
 
         gbc.gridx = 1;
         panel.add(pizzaPriceLabel, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         panel.add(new JLabel("Choisissez un utilisateur:"), gbc);
 
         gbc.gridx = 1;
         panel.add(userComboBox, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         panel.add(new JLabel("Solde de l'utilisateur:"), gbc);
 
         gbc.gridx = 1;
         panel.add(userBalanceLabel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         panel.add(orderButton, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 3;
-        panel.add(new JScrollPane(orderSummaryTextArea), gbc);
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        JScrollPane scrollPane = new JScrollPane(orderSummaryTextArea);
+        //scrollPane.setVerticalScrollBarPolicy(JScrollPane); // Définir la politique d'ajustement
+        panel.add(scrollPane, gbc);
 
         // Ajouter le panneau à la fenêtre
         add(panel);
 
-        updatePizzaPrice(pizzaList);
+        updatePizzaPrice(pizzaList, tailleList);
         updateUserBalance(clientList);
     }
 
-    private void updatePizzaPrice(List<Pizza> pizzaList) {
+    public void Refresh() {
+        List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
+        String[] pizzas = new String[pizzaList.size()];
+        for (int i = 0; i < pizzaList.size(); i++) {
+            pizzas[i] = pizzaList.get(i).getName();
+        }
+        pizzaComboBox.removeAllItems();
+        for (String pizza : pizzas) {
+            pizzaComboBox.addItem(pizza);
+        }
+
+        List<Taille> tailleList = database.getTailles(); // Get sizes from database
+        String[] tailles = new String[tailleList.size()];
+        for (int i = 0; i < tailleList.size(); i++) {
+            tailles[i] = tailleList.get(i).getNomTaille();
+        }
+        sizeComboBox.removeAllItems();
+        for (String taille : tailles) {
+            sizeComboBox.addItem(taille);
+        }
+
+        List<Client> clientList = database.getClients(); // Get clients from database
+        String[] clients = new String[clientList.size()];
+        for (int i = 0; i < clientList.size(); i++) {
+            clients[i] = clientList.get(i).getNomClient() + " " + clientList.get(i).getPrenomClient();
+        }
+        userComboBox.removeAllItems();
+        for (String client : clients) {
+            userComboBox.addItem(client);
+        }
+
+        updatePizzaPrice(pizzaList, tailleList);
+        updateUserBalance(clientList);
+    }
+
+    private void updatePizzaPrice(List<Pizza> pizzaList, List<Taille> tailleList) { 
         String selectedPizza = (String) pizzaComboBox.getSelectedItem();
+        String selectedTaille = (String) sizeComboBox.getSelectedItem();
+
+        float pizzaPrice = 0;
         for (Pizza pizza : pizzaList) {
             if (pizza.getName().equals(selectedPizza)) {
-                pizzaPriceLabel.setText("Prix: " + pizza.getPrice() + " €");
+                pizzaPrice = pizza.getPrice();
                 break;
             }
         }
+
+        float tailleMultiplicatif = 1;
+        for (Taille taille : tailleList) {
+            if (taille.getNomTaille().equals(selectedTaille)) {
+                tailleMultiplicatif = taille.getPrixMultiplicatif();
+                break;
+            }
+        }
+
+        finalPrice = Math.round(pizzaPrice * tailleMultiplicatif * 100) / 100.0f;
+        pizzaPriceLabel.setText("Prix: " + finalPrice + " €");
     }
 
     private void updateUserBalance(List<Client> clientList) {
@@ -141,14 +220,25 @@ public class PizzeriaUI extends JFrame {
 
     private void passOrder(Database database) {
         String selectedPizza = (String) pizzaComboBox.getSelectedItem();
+        String selectedTaille = (String) sizeComboBox.getSelectedItem();
 
         // ajouter dans la base de donnée la commande
-        database.addOrder(selectedPizza);
-
+        boolean hasPassed = database.addOrder(selectedPizza, selectedTaille, finalPrice);
 
         // Créer un StringBuilder pour construire le résumé de la commande
         StringBuilder orderSummary = new StringBuilder();
-        orderSummary.append("Vous avez commandé une pizza ").append(selectedPizza);
+        if (hasPassed) {
+            orderSummary.append("Vous avez commandé une pizza ").append(selectedPizza).append(" de taille ").append(selectedTaille).append(" au prix de ").append(finalPrice).append(" €.");
+
+            // update user balance
+            Client client = database.getClient();
+            userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
+            commandManagerUI.refreshOrders();
+            deliveryUI.refreshOrders();
+        } else {
+            orderSummary.append("Erreur avec la commande ou fond insuffisant ou plus de livreurs disponible.\n");
+        }
+        
 
         orderSummaryTextArea.setText(orderSummary.toString());
     }

@@ -2,18 +2,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
 public class PizzeriaManagerUI extends JFrame {
     private DefaultListModel<String> orderListModel;
     private JList<String> orderList;
     private JTextArea orderDetailsTextArea;
 
-    private ArrayList<String> orders;
+    private List<Order> orders;
 
-    public PizzeriaManagerUI() {
-        // Initialiser les données des commandes
-        orders = new ArrayList<>();
+    private Database database;
+
+    public PizzeriaManagerUI(Database database) {
+        this.database = database;
         
         // Configurer la fenêtre principale
         setTitle("Gestion des commandes de la Pizzeria");
@@ -30,19 +31,11 @@ public class PizzeriaManagerUI extends JFrame {
         orderDetailsTextArea = new JTextArea(10, 30);
         orderDetailsTextArea.setEditable(false);
 
-        JButton addOrderButton = new JButton("Ajouter une commande");
-        addOrderButton.addActionListener(new ActionListener() {
+        JButton refreshOrdersButton = new JButton("Rafraîchir les commandes");
+        refreshOrdersButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addOrder();
-            }
-        });
-
-        JButton removeOrderButton = new JButton("Supprimer la commande");
-        removeOrderButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeOrder();
+                refreshOrders();
             }
         });
 
@@ -51,8 +44,7 @@ public class PizzeriaManagerUI extends JFrame {
         panel.setLayout(new BorderLayout());
         
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(addOrderButton);
-        buttonPanel.add(removeOrderButton);
+        buttonPanel.add(refreshOrdersButton);
         
         panel.add(new JScrollPane(orderList), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -60,43 +52,41 @@ public class PizzeriaManagerUI extends JFrame {
 
         // Ajouter le panneau à la fenêtre
         add(panel);
+
+        // Rafraîchir les commandes lors du lancement
+        refreshOrders();
     }
 
     private void showOrderDetails() {
         int selectedIndex = orderList.getSelectedIndex();
         if (selectedIndex != -1) {
-            String orderDetails = orders.get(selectedIndex);
-            orderDetailsTextArea.setText(orderDetails);
+            Order selectedOrder = orders.get(selectedIndex);
+            orderDetailsTextArea.setText(selectedOrder.toString());
         } else {
             orderDetailsTextArea.setText("");
         }
     }
 
-    private void addOrder() {
-        String newOrder = JOptionPane.showInputDialog(this, "Entrez les détails de la commande:");
-        if (newOrder != null && !newOrder.trim().isEmpty()) {
-            orders.add(newOrder);
-            orderListModel.addElement("Commande " + (orders.size()));
+    public void refreshOrders() {
+        orders = database.getOrders();
+        orderListModel.clear();
+        for (Order order : orders) {
+            orderListModel.addElement("Commande " + order.getId() + " - " + database.getPizzaNameFromOrder(order) + " - " + database.getTailleFromOrder(order));
         }
     }
 
     private void removeOrder() {
         int selectedIndex = orderList.getSelectedIndex();
         if (selectedIndex != -1) {
-            orders.remove(selectedIndex);
-            orderListModel.remove(selectedIndex);
-            orderDetailsTextArea.setText("");
+            // Supprimer la commande de la base de données (à implémenter dans la classe Database)
+            Order orderToRemove = orders.get(selectedIndex);
+            //database.removeOrder(orderToRemove.getId());
+
+            // Rafraîchir la liste des commandes
+            refreshOrders();
         } else {
             JOptionPane.showMessageDialog(this, "Veuillez sélectionner une commande à supprimer.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new PizzeriaManagerUI().setVisible(true);
-            }
-        });
-    }
 }

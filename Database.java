@@ -93,7 +93,22 @@ public class Database {
         return pizzaList;
     }
 
-    private List<Livreur> getFreeDelivery() {
+    public List<Taille> getTailles() {
+        List<Taille> tailles = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM Tailles");
+            while (resultSet.next()) {
+                Taille taille = new Taille(resultSet.getString("nomTaille"), resultSet.getFloat("prixMultiplicatif"));
+                tailles.add(taille);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tailles;
+    }
+
+    private List<Livreur> getFreeLivreur() {
         // Requête SQL pour trouver les livreurs libres
         String query = "SELECT idLivreur, nomLivreur, prenomLivreur " +
                         "FROM Livreurs " +
@@ -131,9 +146,28 @@ public class Database {
         return livreursLibres;
     }
 
-    public void addOrder(String selectedPizzaString) {
+    private void updateClientSolde(float newSolde) {
         try {
+            newSolde = Math.round(newSolde * 100) / 100.0f;
+            String updateClientQuery = "UPDATE Clients SET solde = ? WHERE idClient = ?";
+            PreparedStatement pstmt = connection.prepareStatement(updateClientQuery);
+            pstmt.setFloat(1, newSolde);
+            pstmt.setInt(2, client.getIdClient());
 
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Client débité avec succès.");
+                client.setSolde(newSolde);
+            } else {
+                System.out.println("Erreur lors du débit du client.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean addOrder(String selectedPizzaString, String selectedSizeString, float price) {
+        try {
             List<Pizza> pizzaList = getPizzas();
             Pizza selectedPizza = null;
             for (Pizza pizza : pizzaList) {
@@ -143,7 +177,26 @@ public class Database {
                 }
             }
 
-            List<Livreur> livreurs = getFreeDelivery();
+            List<Taille> tailleList = getTailles();
+            Taille selectedSize = null;
+            for (Taille taille : tailleList) {
+                if (taille.getNomTaille().equals(selectedSizeString)) {
+                    selectedSize = taille;
+                    break;
+                }
+            }
+
+            List<Livreur> livreurs = getFreeLivreur();
+
+            if (livreurs.isEmpty()) {
+                System.out.println("Aucun livreur disponible.");
+                return false;
+            }
+
+            if (client.getSolde() < selectedPizza.getPrice()) {
+                System.out.println("Fonds insuffisants.");
+                return false;
+            }
 
             String insertOrderQuery = "INSERT INTO CommandesEnCours (prixCommande, idLivreur, idClient) VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertOrderQuery);
@@ -153,12 +206,29 @@ public class Database {
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
+
+                // get id from last inserted order
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT MAX(idCommandeEnCours) FROM CommandesEnCours");
+                int idCommandeEnCours = -1;
+                if (resultSet.next()) {
+                    idCommandeEnCours = resultSet.getInt(1);
+                }
+
+                // insert into PizzaEnCommande
+                addPizzaEnCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommandeEnCours);
+
+                updateClientSolde(client.getSolde() - selectedPizza.getPrice());
+
                 System.out.println("Commande créée avec succès.");
+                return true;
             } else {
                 System.out.println("Erreur lors de la création de la commande.");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -219,5 +289,175 @@ public class Database {
         }
         Client client = new Client(idClient, nomClient, prenomClient, adresseClient, solde);
         return client;
+    }
+
+    public void addPizzaEnCommande(int idPizza, String nomTaille, int idCommandeEnCours) {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO PizzaEnCommande (idPizza, nomTaille, idCommandeEnCours) VALUES (?, ?, ?)");
+            stmt.setInt(1, idPizza);
+            stmt.setString(2, nomTaille);
+            stmt.setInt(3, idCommandeEnCours);
+            int ex = stmt.executeUpdate();
+            
+            if (ex > 0) {
+                System.out.println("Pizza ajoutée avec succès dans PizzaEnCommande.");
+            } else {
+                System.out.println("Erreur lors de l'ajout de la pizza dans PizzaEnCommande.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void addLivreur(String string, String string2) {
+        try {
+            // il faut ajouter un véhicule pour le livreur
+            String sqlVehicle = "INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmtVehicle = connection.prepareStatement(sqlVehicle, Statement.RETURN_GENERATED_KEYS);
+            pstmtVehicle.setString(1, "Renault");
+            pstmtVehicle.setString(2, "Clio");
+            pstmtVehicle.setString(3, "1234ABCD");
+            pstmtVehicle.setString(4, "Voiture");
+
+            int vehicleId = -1;
+            int affectedRowsVehicle = pstmtVehicle.executeUpdate();
+            if (affectedRowsVehicle > 0) {
+                System.out.println("Véhicule ajouté avec succès.");
+                // il faut que je récupère l'id du véhicule ajouté
+                ResultSet generatedKeys = pstmtVehicle.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    vehicleId = generatedKeys.getInt(1);
+                }
+            } else {
+                System.out.println("Erreur lors de l'ajout du Véhicule.");
+            }
+
+            String sql = "INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES (?, ?, ?)";
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, string);
+            pstmt.setString(2, string2);
+            pstmt.setInt(3, vehicleId);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("Livreur ajouté avec succès.");
+            } else {
+                System.out.println("Erreur lors de l'ajout du livreur.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertData() {
+        // execute the SQL script insertTables.sql
+        ScriptRunner runner = new ScriptRunner(connection, true, true);
+        try {
+            runner.runScript(new BufferedReader(new FileReader("SQLScripts/insertTables.sql")));
+            System.out.println("Data inserted successfully.");
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Client getClient() {
+        return this.client;
+    }
+
+    public List<Order> getOrders() {
+        List<Order> orders = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM CommandesEnCours");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("idCommandeEnCours");
+                float price = resultSet.getFloat("prixCommande");
+                String date = resultSet.getString("dateCommande");
+                boolean isFree = resultSet.getBoolean("estGratuit");
+                int delivererId = resultSet.getInt("idLivreur");
+                int clientId = resultSet.getInt("idClient");
+
+                orders.add(new Order(id, price, date, isFree, delivererId, clientId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public String getPizzaNameFromOrder(Order order) {
+        String pizzaName = "";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("SELECT nomPizza FROM Pizzas WHERE idPizza = (SELECT idPizza FROM PizzaEnCommande WHERE idCommandeEnCours = ?)");
+            pstmt.setInt(1, order.getId());
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                pizzaName = rset.getString("nomPizza");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pizzaName;
+    }
+
+    public String getTailleFromOrder(Order order) {
+        String taille = "";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("SELECT nomTaille FROM PizzaEnCommande WHERE idCommandeEnCours = ?");
+            pstmt.setInt(1, order.getId());
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                taille = rset.getString("nomTaille");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return taille;
+    }
+
+    public List<Livreur> getLivreurs() {
+        List<Livreur> livreurs = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM Livreurs");
+            while (resultSet.next()) {
+                Livreur livreur = new Livreur(resultSet.getInt("idLivreur"), resultSet.getString("nomLivreur"), resultSet.getString("prenomLivreur"));
+                livreurs.add(livreur);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return livreurs;
+    }
+
+    public Order getOrderByLivreur(Livreur Livreur) {
+        Order order = null;
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM CommandesEnCours WHERE idLivreur = ?");
+            pstmt.setInt(1, Livreur.getIdLivreur());
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                order = new Order(rset.getInt("idCommandeEnCours"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getBoolean("estGratuit"), rset.getInt("idLivreur"), rset.getInt("idClient"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return order;
+    }
+
+    public String getAdressById(int clientId) {
+        String adresse = "";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("SELECT adresseClient FROM Clients WHERE idClient = ?");
+            pstmt.setInt(1, clientId);
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                adresse = rset.getString("adresseClient");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return adresse;
     }
 }

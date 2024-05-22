@@ -5,7 +5,7 @@ INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
 ('4 Fromages', 10.99);
 
 -- Insertion des données dans la table Ingredients
-INSERT INTO Ingredients (stock, nomIngrédient) VALUES
+INSERT INTO Ingredients (stock, nomIngredient) VALUES
 (100, 'Tomate'),
 (150, 'Mozzarella'),
 (120, 'Pepperoni'),
@@ -15,9 +15,9 @@ INSERT INTO Ingredients (stock, nomIngrédient) VALUES
 
 -- Insertion des données dans la table Tailles
 INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
-('Petite', 1.0),
-('Moyenne', 1.2),
-('Grande', 1.5);
+('Petite', 0.66),
+('Moyenne', 1),
+('Grande', 1.33);
 
 -- Insertion des données dans la table Clients
 INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
