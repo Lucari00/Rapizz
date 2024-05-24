@@ -55,29 +55,16 @@ CREATE TABLE IF NOT EXISTS Livreurs(
    FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
 );
 
-CREATE TABLE IF NOT EXISTS CommandesEnCours(
-   idCommandeEnCours INT AUTO_INCREMENT,
-   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande>= 0),
-   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
-   estGratuit BOOLEAN NOT NULL DEFAULT false,
-   idLivreur INT NOT NULL,
-   idClient INT NOT NULL,
-   PRIMARY KEY(idCommandeEnCours),
-   UNIQUE(idLivreur),
-   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
-   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
-);
-
-CREATE TABLE IF NOT EXISTS CommandesLivrees(
-   idCommandeLivree INT AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
    prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
-   tempsLivraison DECIMAL(15,2) NOT NULL,
+   tempsLivraison DECIMAL(15,2),
    dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
-   dateLivree DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
    estGratuit BOOLEAN NOT NULL DEFAULT false,
    idLivreur INT NOT NULL,
    idClient INT NOT NULL,
-   PRIMARY KEY(idCommandeLivree),
+   PRIMARY KEY(idCommande),
    FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
    FOREIGN KEY(idClient) REFERENCES Clients(idClient)
 );
@@ -90,22 +77,31 @@ CREATE TABLE IF NOT EXISTS IngredientPizza(
    FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
 );
 
-CREATE TABLE IF NOT EXISTS PizzaEnCommande(
+CREATE TABLE IF NOT EXISTS PizzaCommande(
    idPizza INT,
    nomTaille VARCHAR(20),
-   idCommandeEnCours INT,
-   PRIMARY KEY(idPizza, nomTaille, idCommandeEnCours),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
    FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
    FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
-   FOREIGN KEY(idCommandeEnCours) REFERENCES CommandesEnCours(idCommandeEnCours)
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
 );
 
-CREATE TABLE IF NOT EXISTS PizzaLivree(
-   idPizza INT,
-   nomTaille VARCHAR(20),
-   idCommandeLivree INT,
-   PRIMARY KEY(idPizza, nomTaille, idCommandeLivree),
-   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
-   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
-   FOREIGN KEY(idCommandeLivree) REFERENCES CommandesLivrees(idCommandeLivree)
-);
+DELIMITER $$
+
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END$$
+
+DELIMITER ;

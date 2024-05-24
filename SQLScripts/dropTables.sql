@@ -1,1 +1,2 @@
-DROP TABLE IF EXISTS IngredientPizza, PizzaEnCommande, PizzaLivree, CommandesEnCours, CommandesLivrees, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas;
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas;
+DROP TRIGGER IF EXISTS check_livreur_commande;

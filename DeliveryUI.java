@@ -118,6 +118,7 @@ public class DeliveryUI extends JFrame {
         if (selectedIndex != -1) {
             //String deliveredOrder = orders.remove(selectedIndex);
             orderListModel.remove(selectedIndex);
+            database.markAsDelivered(order.getId());
             //JOptionPane.showMessageDialog(this, deliveredOrder + " a été marqué comme livré.", "Commande Livrée", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Veuillez sélectionner une commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);

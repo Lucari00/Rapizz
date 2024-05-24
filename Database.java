@@ -39,7 +39,7 @@ public class Database {
 
         usernameString = props.getProperty("db.user");
         passwordString = props.getProperty("db.password");
-        
+
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
@@ -88,6 +88,7 @@ public class Database {
     public void resetDatabase() {
         DeleteDatabseTables();
         CreateTable();
+        System.out.println("Database reset");
     }
 
     public List<Pizza> getPizzas() {
@@ -134,7 +135,7 @@ public class Database {
         // Requête SQL pour trouver les livreurs libres
         String query = "SELECT idLivreur, nomLivreur, prenomLivreur " +
                         "FROM Livreurs " +
-                        "WHERE idLivreur NOT IN (SELECT idLivreur FROM CommandesEnCours)";
+                        "WHERE idLivreur NOT IN (SELECT idLivreur FROM Commandes WHERE dateLivree IS NULL)";
 
         
         PreparedStatement pstmt;
@@ -220,7 +221,7 @@ public class Database {
                 return false;
             }
 
-            String insertOrderQuery = "INSERT INTO CommandesEnCours (prixCommande, idLivreur, idClient) VALUES (?, ?, ?)";
+            String insertOrderQuery = "INSERT INTO Commandes (prixCommande, idLivreur, idClient) VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertOrderQuery);
             pstmt.setFloat(1, selectedPizza.getPrice());
             pstmt.setInt(2, livreurs.get(0).getIdLivreur());
@@ -231,14 +232,14 @@ public class Database {
 
                 // get id from last inserted order
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT MAX(idCommandeEnCours) FROM CommandesEnCours");
-                int idCommandeEnCours = -1;
+                ResultSet resultSet = statement.executeQuery("SELECT MAX(idCommande) FROM Commandes");
+                int idCommande = -1;
                 if (resultSet.next()) {
-                    idCommandeEnCours = resultSet.getInt(1);
+                    idCommande = resultSet.getInt(1);
                 }
 
-                // insert into PizzaEnCommande
-                addPizzaEnCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommandeEnCours);
+                // insert into PizzaCommande
+                addPizzaCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommande);
 
                 updateClientSolde(client.getSolde() - selectedPizza.getPrice());
 
@@ -246,6 +247,26 @@ public class Database {
                 return true;
             } else {
                 System.out.println("Erreur lors de la création de la commande.");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean markAsDelivered(int idCommande) {
+        try {
+            String updateOrderQuery = "UPDATE Commandes SET dateLivree = NOW(), tempsLivraison = TIMESTAMPDIFF(MINUTE, dateCommande, NOW()) WHERE idCommande = ?";
+            PreparedStatement pstmt = connection.prepareStatement(updateOrderQuery);
+            pstmt.setInt(1, idCommande);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Commande marquée comme livrée avec succès.");
+                return true;
+            } else {
+                System.out.println("Erreur lors du marquage de la commande comme livrée.");
                 return false;
             }
         } catch (SQLException e) {
@@ -313,18 +334,18 @@ public class Database {
         return client;
     }
 
-    public void addPizzaEnCommande(int idPizza, String nomTaille, int idCommandeEnCours) {
+    public void addPizzaCommande(int idPizza, String nomTaille, int idCommande) {
         try {
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO PizzaEnCommande (idPizza, nomTaille, idCommandeEnCours) VALUES (?, ?, ?)");
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES (?, ?, ?)");
             stmt.setInt(1, idPizza);
             stmt.setString(2, nomTaille);
-            stmt.setInt(3, idCommandeEnCours);
+            stmt.setInt(3, idCommande);
             int ex = stmt.executeUpdate();
             
             if (ex > 0) {
-                System.out.println("Pizza ajoutée avec succès dans PizzaEnCommande.");
+                System.out.println("Pizza ajoutée avec succès dans PizzaCommande.");
             } else {
-                System.out.println("Erreur lors de l'ajout de la pizza dans PizzaEnCommande.");
+                System.out.println("Erreur lors de l'ajout de la pizza dans PizzaCommande.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -391,9 +412,9 @@ public class Database {
         List<Order> orders = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM CommandesEnCours");
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM Commandes WHERE dateLivree IS NULL");
             while (resultSet.next()) {
-                int id = resultSet.getInt("idCommandeEnCours");
+                int id = resultSet.getInt("idCommande");
                 float price = resultSet.getFloat("prixCommande");
                 String date = resultSet.getString("dateCommande");
                 boolean isFree = resultSet.getBoolean("estGratuit");
@@ -411,7 +432,7 @@ public class Database {
     public String getPizzaNameFromOrder(Order order) {
         String pizzaName = "";
         try {
-            PreparedStatement pstmt = connection.prepareStatement("SELECT nomPizza FROM Pizzas WHERE idPizza = (SELECT idPizza FROM PizzaEnCommande WHERE idCommandeEnCours = ?)");
+            PreparedStatement pstmt = connection.prepareStatement("SELECT nomPizza FROM Pizzas WHERE idPizza = (SELECT idPizza FROM PizzaCommande WHERE idCommande = ?)");
             pstmt.setInt(1, order.getId());
             ResultSet rset = pstmt.executeQuery();
             if (rset.next()) {
@@ -426,7 +447,7 @@ public class Database {
     public String getTailleFromOrder(Order order) {
         String taille = "";
         try {
-            PreparedStatement pstmt = connection.prepareStatement("SELECT nomTaille FROM PizzaEnCommande WHERE idCommandeEnCours = ?");
+            PreparedStatement pstmt = connection.prepareStatement("SELECT nomTaille FROM PizzaCommande WHERE idCommande = ?");
             pstmt.setInt(1, order.getId());
             ResultSet rset = pstmt.executeQuery();
             if (rset.next()) {
@@ -456,11 +477,11 @@ public class Database {
     public Order getOrderByLivreur(Livreur Livreur) {
         Order order = null;
         try {
-            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM CommandesEnCours WHERE idLivreur = ?");
+            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Commandes WHERE idLivreur = ? AND dateLivree IS NULL");
             pstmt.setInt(1, Livreur.getIdLivreur());
             ResultSet rset = pstmt.executeQuery();
             if (rset.next()) {
-                order = new Order(rset.getInt("idCommandeEnCours"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getBoolean("estGratuit"), rset.getInt("idLivreur"), rset.getInt("idClient"));
+                order = new Order(rset.getInt("idCommande"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getBoolean("estGratuit"), rset.getInt("idLivreur"), rset.getInt("idClient"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
