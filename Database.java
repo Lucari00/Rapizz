@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,15 +11,35 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class Database {
     private final String urlString = "jdbc:mysql://localhost:3306/Rapizz";
-    private final String usernameString = "root";
-    private final String passwordString = "root";
+    private String usernameString;
+    private String passwordString;
     private Connection connection;
     private Client client;
 
     public Database(String nomClient, String prenomClient, String adresseClient, float solde) {
+        Properties props = new Properties();
+        File configFile = new File("config.properties");
+
+        if (configFile.exists()) {
+            try (FileInputStream input = new FileInputStream(configFile)) {
+                props.load(input);
+                System.out.println("Configuration loaded from config.properties");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        } else {
+            props.setProperty("db.user", "root");
+            props.setProperty("db.password", "root");
+        }
+
+        usernameString = props.getProperty("db.user");
+        passwordString = props.getProperty("db.password");
+        
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {

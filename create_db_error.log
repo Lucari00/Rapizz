@@ -810,3 +810,95 @@ Error executing 'INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VA
 22/38/2024 11:38:25
 -------
 
+
+-------
+24/51/2024 10:51:16
+-------
+
+
+-------
+24/51/2024 10:51:20
+-------
+
+Error executing 'INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) ' (line 5): Duplicate entry 'Margherita' for key 'pizzas.nomPizza'
+
+-------
+24/51/2024 10:51:21
+-------
+
+
+-------
+24/51/2024 10:51:22
+-------
+
+
+-------
+24/52/2024 10:52:26
+-------
+
+
+-------
+24/52/2024 10:52:31
+-------
+
+
+-------
+24/52/2024 10:52:32
+-------
+
+
+-------
+24/53/2024 10:53:40
+-------
+
+
+-------
+24/53/2024 10:53:46
+-------
+
+Error executing 'INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
+('Dubois', 'Philippe', 1),
+('Lefebvre', 'Julie', 2),
+('Moreau', 'Luc', 3) ' (line 44): Cannot add or update a child row: a foreign key constraint fails (`rapizz`.`livreurs`, CONSTRAINT `livreurs_ibfk_1` FOREIGN KEY (`idVehicule`) REFERENCES `vehicules` (`idVehicule`))
+
+-------
+24/54/2024 10:54:00
+-------
+
+
+-------
+24/54/2024 10:54:05
+-------
+
+
+-------
+24/54/2024 10:54:05
+-------
+
+
+-------
+24/54/2024 10:54:09
+-------
+
+
+-------
+24/54/2024 10:54:22
+-------
+
+Error executing 'INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) ' (line 5): Duplicate entry 'Margherita' for key 'pizzas.nomPizza'
+
+-------
+24/54/2024 10:54:25
+-------
+
+
+-------
+24/54/2024 10:54:25
+-------
+

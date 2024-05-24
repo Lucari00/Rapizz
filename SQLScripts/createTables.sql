@@ -78,7 +78,6 @@ CREATE TABLE IF NOT EXISTS CommandesLivrees(
    idLivreur INT NOT NULL,
    idClient INT NOT NULL,
    PRIMARY KEY(idCommandeLivree),
-   UNIQUE(idLivreur),
    FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
    FOREIGN KEY(idClient) REFERENCES Clients(idClient)
 );
