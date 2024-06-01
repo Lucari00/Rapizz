@@ -1,5 +1,6 @@
-SELECT c.idClient, c.nomClient, c.prenomClient, SUM(prixCommande) AS totalDepense
-FROM Commandes l
-JOIN Clients c ON l.idClient = c.idClient
+SELECT c.idClient, c.nomClient, c.prenomClient, SUM(co.prixCommande) AS montantTotal
+FROM Clients c
+JOIN Commandes co ON c.idClient = co.idClient
 GROUP BY c.idClient, c.nomClient, c.prenomClient
-ORDER BY totalDepense DESC
+ORDER BY montantTotal DESC
+LIMIT 5;

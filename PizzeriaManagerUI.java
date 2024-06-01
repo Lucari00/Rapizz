@@ -74,19 +74,4 @@ public class PizzeriaManagerUI extends JFrame {
             orderListModel.addElement("Commande " + order.getId() + " - " + database.getPizzaNameFromOrder(order) + " - " + database.getTailleFromOrder(order));
         }
     }
-
-    private void removeOrder() {
-        int selectedIndex = orderList.getSelectedIndex();
-        if (selectedIndex != -1) {
-            // Supprimer la commande de la base de données (à implémenter dans la classe Database)
-            Order orderToRemove = orders.get(selectedIndex);
-            //database.removeOrder(orderToRemove.getId());
-
-            // Rafraîchir la liste des commandes
-            refreshOrders();
-        } else {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une commande à supprimer.", "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
 }

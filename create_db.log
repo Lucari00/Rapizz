@@ -14538,3 +14538,4828 @@ CREATE TABLE IF NOT EXISTS PizzaLivree(
    FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
    FOREIGN KEY(idCommandeLivree) REFERENCES CommandesLivrees(idCommandeLivree)
 ) 
+
+-------
+29/15/2024 08:15:38
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/26/2024 08:26:07
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+
+-------
+29/26/2024 08:26:08
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/26/2024 08:26:25
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+
+-------
+29/26/2024 08:26:25
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/27/2024 08:27:08
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+
+-------
+29/27/2024 08:27:08
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/29/2024 08:29:41
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+DROP TRIGGER IF EXISTS check_livreur_commande 
+
+-------
+29/29/2024 08:29:41
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/29/2024 08:29:49
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/30/2024 08:30:11
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+DROP TRIGGER IF EXISTS check_livreur_commande 
+
+-------
+29/30/2024 08:30:11
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/30/2024 08:30:17
+-------
+
+-- Insertion des données dans la table Pizzas
+INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) 
+-- Insertion des données dans la table Ingredients
+INSERT INTO Ingredients (stock, nomIngredient) VALUES
+(100, 'Tomate'),
+(150, 'Mozzarella'),
+(120, 'Pepperoni'),
+(80, 'Champignons'),
+(90, 'Oignons'),
+(110, 'Olives') 
+-- Insertion des données dans la table Tailles
+INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
+('Petite', 0.66),
+('Moyenne', 1),
+('Grande', 1.33) 
+-- Insertion des données dans la table Clients
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4) 
+-- Insertion des données dans la table TypeVehicules
+INSERT INTO TypeVehicules (type, distance) VALUES
+('Voiture', 100),
+('Vélo', 20),
+('Moto', 80) 
+-- Insertion des données dans la table Vehicules
+INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
+('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
+('Peugeot', 'VTT', 'EF-456-GH', 'Vélo'),
+('Honda', 'CBR', 'IJ-789-KL', 'Moto') 
+-- Insertion des données dans la table Livreurs
+INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
+('Dubois', 'Philippe', 1),
+('Lefebvre', 'Julie', 2),
+('Moreau', 'Luc', 3) 
+-- Insertion des données dans la table Commandes
+INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
+(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
+(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
+(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3) 
+-- Insertion des données dans la table IngredientPizza
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+(1, 1),
+(1, 2),
+(1, 6),
+(2, 1),
+(2, 3),
+(2, 6),
+(3, 1),
+(3, 2),
+(3, 4),
+(3, 5) 
+-- Insertion des données dans la table PizzaCommande
+INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES
+(1, 'Petite', 1),
+(2, 'Moyenne', 2),
+(3, 'Grande', 3) 
+
+-------
+29/32/2024 08:32:27
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/36/2024 08:36:42
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/38/2024 08:38:12
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/38/2024 08:38:27
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+DROP TRIGGER IF EXISTS check_livreur_commande 
+
+-------
+29/38/2024 08:38:27
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/38/2024 08:38:30
+-------
+
+-- Insertion des données dans la table Pizzas
+INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) 
+-- Insertion des données dans la table Ingredients
+INSERT INTO Ingredients (stock, nomIngredient) VALUES
+(100, 'Tomate'),
+(150, 'Mozzarella'),
+(120, 'Pepperoni'),
+(80, 'Champignons'),
+(90, 'Oignons'),
+(110, 'Olives') 
+-- Insertion des données dans la table Tailles
+INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
+('Petite', 0.66),
+('Moyenne', 1),
+('Grande', 1.33) 
+-- Insertion des données dans la table Clients
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4) 
+-- Insertion des données dans la table TypeVehicules
+INSERT INTO TypeVehicules (type, distance) VALUES
+('Voiture', 100),
+('Vélo', 20),
+('Moto', 80) 
+-- Insertion des données dans la table Vehicules
+INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
+('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
+('Peugeot', 'VTT', 'EF-456-GH', 'Vélo'),
+('Honda', 'CBR', 'IJ-789-KL', 'Moto') 
+-- Insertion des données dans la table Livreurs
+INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
+('Dubois', 'Philippe', 1),
+('Lefebvre', 'Julie', 2),
+('Moreau', 'Luc', 3) 
+-- Insertion des données dans la table Commandes
+INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
+(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
+(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
+(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3) 
+-- Insertion des données dans la table IngredientPizza
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+(1, 1),
+(1, 2),
+(1, 6),
+(2, 1),
+(2, 3),
+(2, 6),
+(3, 1),
+(3, 2),
+(3, 4),
+(3, 5) 
+-- Insertion des données dans la table PizzaCommande
+INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES
+(1, 'Petite', 1),
+(2, 'Moyenne', 2),
+(3, 'Grande', 3) 
+
+-------
+29/41/2024 08:41:12
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/41/2024 08:41:30
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/42/2024 08:42:37
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/42/2024 08:42:52
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/44/2024 08:44:52
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/45/2024 08:45:34
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/45/2024 08:45:57
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/46/2024 08:46:40
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/03/2024 09:03:32
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/13/2024 09:13:12
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/17/2024 09:17:41
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/29/2024 09:29:02
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/55/2024 09:55:28
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/56/2024 09:56:13
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/56/2024 09:56:16
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+DROP TRIGGER IF EXISTS check_livreur_commande 
+
+-------
+29/56/2024 09:56:16
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/56/2024 09:56:19
+-------
+
+-- Insertion des données dans la table Pizzas
+INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) 
+-- Insertion des données dans la table Ingredients
+INSERT INTO Ingredients (stock, nomIngredient) VALUES
+(100, 'Tomate'),
+(150, 'Mozzarella'),
+(120, 'Pepperoni'),
+(80, 'Champignons'),
+(90, 'Oignons'),
+(110, 'Olives') 
+-- Insertion des données dans la table Tailles
+INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
+('Petite', 0.66),
+('Moyenne', 1),
+('Grande', 1.33) 
+-- Insertion des données dans la table Clients
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4) 
+-- Insertion des données dans la table TypeVehicules
+INSERT INTO TypeVehicules (type, distance) VALUES
+('Voiture', 100),
+('Vélo', 20),
+('Moto', 80) 
+-- Insertion des données dans la table Vehicules
+INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
+('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
+('Peugeot', 'VTT', 'EF-456-GH', 'Vélo'),
+('Honda', 'CBR', 'IJ-789-KL', 'Moto') 
+-- Insertion des données dans la table Livreurs
+INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
+('Dubois', 'Philippe', 1),
+('Lefebvre', 'Julie', 2),
+('Moreau', 'Luc', 3) 
+-- Insertion des données dans la table Commandes
+INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
+(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
+(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
+(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3) 
+-- Insertion des données dans la table IngredientPizza
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+(1, 1),
+(1, 2),
+(1, 6),
+(2, 1),
+(2, 3),
+(2, 6),
+(3, 1),
+(3, 2),
+(3, 4),
+(3, 5) 
+-- Insertion des données dans la table PizzaCommande
+INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES
+(1, 'Petite', 1),
+(2, 'Moyenne', 2),
+(3, 'Grande', 3) 
+
+-------
+29/06/2024 10:06:02
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/06/2024 10:06:24
+-------
+
+DROP TABLE IF EXISTS IngredientPizza, PizzaCommande, Commandes, Livreurs, Vehicules, TypeVehicules, Clients, Tailles, Ingredients, Pizzas 
+DROP TRIGGER IF EXISTS check_livreur_commande 
+
+-------
+29/06/2024 10:06:24
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/06/2024 10:06:26
+-------
+
+-- Insertion des données dans la table Pizzas
+INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) 
+-- Insertion des données dans la table Ingredients
+INSERT INTO Ingredients (stock, nomIngredient) VALUES
+(100, 'Tomate'),
+(150, 'Mozzarella'),
+(120, 'Pepperoni'),
+(80, 'Champignons'),
+(90, 'Oignons'),
+(110, 'Olives') 
+-- Insertion des données dans la table Tailles
+INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
+('Petite', 0.66),
+('Moyenne', 1),
+('Grande', 1.33) 
+-- Insertion des données dans la table Clients
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4) 
+-- Insertion des données dans la table TypeVehicules
+INSERT INTO TypeVehicules (type, distance) VALUES
+('Voiture', 100),
+('Vélo', 20),
+('Moto', 80) 
+-- Insertion des données dans la table Vehicules
+INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
+('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
+('Peugeot', 'VTT', 'EF-456-GH', 'Vélo'),
+('Honda', 'CBR', 'IJ-789-KL', 'Moto') 
+-- Insertion des données dans la table Livreurs
+INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
+('Dubois', 'Philippe', 1),
+('Lefebvre', 'Julie', 2),
+('Moreau', 'Luc', 3) 
+-- Insertion des données dans la table Commandes
+INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
+(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
+(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
+(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3) 
+-- Insertion des données dans la table IngredientPizza
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+(1, 1),
+(1, 2),
+(1, 6),
+(2, 1),
+(2, 3),
+(2, 6),
+(3, 1),
+(3, 2),
+(3, 4),
+(3, 5) 
+-- Insertion des données dans la table PizzaCommande
+INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES
+(1, 'Petite', 1),
+(2, 'Moyenne', 2),
+(3, 'Grande', 3) 
+
+-------
+29/07/2024 10:07:21
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/07/2024 10:07:56
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/12/2024 10:12:30
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/43/2024 10:43:35
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/44/2024 10:44:15
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/47/2024 10:47:19
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/48/2024 10:48:56
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/49/2024 10:49:24
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/49/2024 10:49:38
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/59/2024 10:59:15
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/05/2024 11:05:16
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/06/2024 11:06:36
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/14/2024 11:14:57
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/17/2024 11:17:44
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/23/2024 11:23:27
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/29/2024 11:29:39
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/31/2024 11:31:46
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/32/2024 11:32:07
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
+
+-------
+29/32/2024 11:32:24
+-------
+
+CREATE TABLE IF NOT EXISTS Pizzas(
+   idPizza INT AUTO_INCREMENT,
+   nomPizza VARCHAR(50) NOT NULL,
+   prixPizza DECIMAL(15,2) NOT NULL CHECK (prixPizza >= 0),
+   PRIMARY KEY(idPizza),
+   UNIQUE(nomPizza)
+) 
+CREATE TABLE IF NOT EXISTS Ingredients(
+   idIngredient INT AUTO_INCREMENT,
+   stock INT NOT NULL CHECK (stock >= 0),
+   nomIngredient VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS Tailles(
+   nomTaille VARCHAR(20),
+   prixMultiplicatif DECIMAL(3,2) CHECK (prixMultiplicatif >= 0),
+   PRIMARY KEY(nomTaille)
+) 
+CREATE TABLE IF NOT EXISTS Clients(
+   idClient INT AUTO_INCREMENT,
+   nomClient VARCHAR(50) NOT NULL,
+   prenomClient VARCHAR(50) NOT NULL,
+   adresseClient VARCHAR(100) NOT NULL,
+   solde DECIMAL(15,2) CHECK (solde >= 0),
+   nombreCommandes INT NOT NULL,
+   PRIMARY KEY(idClient)
+) 
+CREATE TABLE IF NOT EXISTS TypeVehicules(
+   type VARCHAR(50),
+   distance DECIMAL(15,2) NOT NULL,
+   PRIMARY KEY(type)
+) 
+CREATE TABLE IF NOT EXISTS Vehicules(
+   idVehicule INT AUTO_INCREMENT,
+   Marque VARCHAR(50) NOT NULL,
+   nomVehicule VARCHAR(50) NOT NULL,
+   immatriculation VARCHAR(50) NOT NULL,
+   typeVehicule VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idVehicule),
+   FOREIGN KEY(typeVehicule) REFERENCES TypeVehicules(type)
+) 
+CREATE TABLE IF NOT EXISTS Livreurs(
+   idLivreur INT AUTO_INCREMENT,
+   nomLivreur VARCHAR(50) NOT NULL,
+   prenomLivreur VARCHAR(50) NOT NULL,
+   idVehicule INT,
+   PRIMARY KEY(idLivreur),
+   UNIQUE(idVehicule),
+   FOREIGN KEY(idVehicule) REFERENCES Vehicules(idVehicule)
+) 
+CREATE TABLE IF NOT EXISTS Commandes(
+   idCommande INT AUTO_INCREMENT,
+   prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
+   tempsLivraison DECIMAL(15,2),
+   dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
+   dateLivree DATETIME,
+   estGratuit BOOLEAN NOT NULL DEFAULT false,
+   idLivreur INT NOT NULL,
+   idClient INT NOT NULL,
+   PRIMARY KEY(idCommande),
+   FOREIGN KEY(idLivreur) REFERENCES Livreurs(idLivreur),
+   FOREIGN KEY(idClient) REFERENCES Clients(idClient)
+) 
+CREATE TABLE IF NOT EXISTS IngredientPizza(
+   idPizza INT,
+   idIngredient INT,
+   PRIMARY KEY(idPizza, idIngredient),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(idIngredient) REFERENCES Ingredients(idIngredient)
+) 
+CREATE TABLE IF NOT EXISTS PizzaCommande(
+   idPizza INT,
+   nomTaille VARCHAR(20),
+   idCommande INT,
+   PRIMARY KEY(idPizza, nomTaille, idCommande),
+   FOREIGN KEY(idPizza) REFERENCES Pizzas(idPizza),
+   FOREIGN KEY(nomTaille) REFERENCES Tailles(nomTaille),
+   FOREIGN KEY(idCommande) REFERENCES Commandes(idCommande)
+) 
+CREATE TRIGGER IF NOT EXISTS check_livreur_commande 
+BEFORE INSERT ON Commandes
+FOR EACH ROW
+BEGIN
+    DECLARE livreurCount INT;
+    SELECT COUNT(*) INTO livreurCount 
+    FROM Commandes
+    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+    IF livreurCount > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+    END IF;
+END 
