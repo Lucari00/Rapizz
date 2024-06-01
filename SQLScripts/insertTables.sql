@@ -20,10 +20,10 @@ INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
 ('Grande', 1.33);
 
 -- Insertion des données dans la table Clients
-INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
-('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
-('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
-('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4);
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00);
 
 -- Insertion des données dans la table TypeVehicules
 INSERT INTO TypeVehicules (type, distance) VALUES
@@ -44,10 +44,10 @@ INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
 ('Moreau', 'Luc', 3);
 
 -- Insertion des données dans la table Commandes
-INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
-(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
-(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
-(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3);
+INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, idLivreur, idClient) VALUES
+(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 1, 1),
+(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 2, 2),
+(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 3, 3);
 
 -- Insertion des données dans la table IngredientPizza
 INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES

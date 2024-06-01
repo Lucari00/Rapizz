@@ -257,8 +257,8 @@ public class Database {
 
     public boolean markAsDelivered(int idCommande) {
         try {
-            String updateOrderQuery = "UPDATE Commandes SET dateLivree = NOW(), tempsLivraison = TIMESTAMPDIFF(MINUTE, dateCommande, NOW()) WHERE idCommande = ?";
-            PreparedStatement pstmt = connection.prepareStatement(updateOrderQuery);
+            String updateCommandeLivree = "CALL update_commande_livree(?)";
+            PreparedStatement pstmt = connection.prepareStatement(updateCommandeLivree);
             pstmt.setInt(1, idCommande);
 
             int rowsAffected = pstmt.executeUpdate();
@@ -305,13 +305,12 @@ public class Database {
     public Client CreateClient(String nomClient, String prenomClient, String adresseClient, float solde) {
         int idClient = -1;
         try {
-            String sql = "INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde) VALUES (?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, nomClient);
             pstmt.setString(2, prenomClient);
             pstmt.setString(3, adresseClient);
             pstmt.setFloat(4, solde);
-            pstmt.setInt(5, 0);
 
             // Exécuter la requête
             int affectedRows = pstmt.executeUpdate();
@@ -417,11 +416,10 @@ public class Database {
                 int id = resultSet.getInt("idCommande");
                 float price = resultSet.getFloat("prixCommande");
                 String date = resultSet.getString("dateCommande");
-                boolean isFree = resultSet.getBoolean("estGratuit");
                 int delivererId = resultSet.getInt("idLivreur");
                 int clientId = resultSet.getInt("idClient");
 
-                orders.add(new Order(id, price, date, isFree, delivererId, clientId));
+                orders.add(new Order(id, price, date, delivererId, clientId));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -481,7 +479,7 @@ public class Database {
             pstmt.setInt(1, Livreur.getIdLivreur());
             ResultSet rset = pstmt.executeQuery();
             if (rset.next()) {
-                order = new Order(rset.getInt("idCommande"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getBoolean("estGratuit"), rset.getInt("idLivreur"), rset.getInt("idClient"));
+                order = new Order(rset.getInt("idCommande"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getInt("idLivreur"), rset.getInt("idClient"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

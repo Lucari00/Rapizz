@@ -236,7 +236,7 @@ public class PizzeriaUI extends JFrame {
             commandManagerUI.refreshOrders();
             deliveryUI.refreshOrders();
         } else {
-            orderSummary.append("Erreur avec la commande ou fond insuffisant ou plus de livreurs disponible.\n");
+            orderSummary.append("Erreur avec la commande ou fonds insuffisants ou plus de livreurs disponibles.\n");
         }
         
 
