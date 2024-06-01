@@ -122,7 +122,7 @@ BEGIN
    WHERE idCommande = idCmde;
 
    -- Si le temps de livraison est supérieur à 30 minutes, rembourser le client et mettre à jour le prix de la commande
-   IF tempsLivraison > 1 THEN
+   IF tempsLivraison > 30 THEN
       SELECT prixCommande, idClient INTO prixCmde, idClt
       FROM Commandes
       WHERE idCommande = idCmde;

@@ -90,7 +90,7 @@ public class PizzeriaUI extends JFrame {
         userComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateUserBalance(clientList);
+                updateUserBalance();
             }
         });
 
@@ -172,7 +172,7 @@ public class PizzeriaUI extends JFrame {
         add(panel);
 
         updatePizzaPrice(pizzaList, tailleList);
-        updateUserBalance(clientList);
+        updateUserBalance();
     }
 
     private void showAddBalancePopup() {
@@ -186,6 +186,7 @@ public class PizzeriaUI extends JFrame {
                 }
 
                 Client client = database.getClient();
+                database.refreshClientSolde(client); // Récupérer le solde actuel du client
                 client.setSolde(client.getSolde() + amountToAdd);
                 database.updateClientSolde(client.getSolde()); // Mettre à jour le solde dans la base de données
                 userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
@@ -267,7 +268,7 @@ public class PizzeriaUI extends JFrame {
         }
 
         updatePizzaPrice(pizzaList, tailleList);
-        updateUserBalance(clientList);
+        updateUserBalance();
     }
 
     private void updatePizzaPrice(List<Pizza> pizzaList, List<Taille> tailleList) { 
@@ -294,10 +295,12 @@ public class PizzeriaUI extends JFrame {
         pizzaPriceLabel.setText("Prix: " + finalPrice + " €");
     }
 
-    private void updateUserBalance(List<Client> clientList) {
+    public void updateUserBalance(){
+        List<Client> clientList = database.getClients(); // Get clients from database
         String selectedClient = (String) userComboBox.getSelectedItem();
         for (Client client : clientList) {
             if ((client.getNomClient() + " " + client.getPrenomClient()).equals(selectedClient)) {
+                database.refreshClientSolde(client);
                 userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
                 database.setClient(client);
                 break;

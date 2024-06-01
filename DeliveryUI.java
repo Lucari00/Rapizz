@@ -16,6 +16,7 @@ public class DeliveryUI extends JFrame {
     private Database database;
     private MainPizzeriaUI mainPizzeriaUI;
     private PizzeriaManagerUI commandManagerUI;
+    private PizzeriaUI pizzeriaUI;
 
     public DeliveryUI(Database database, MainPizzeriaUI mainPizzeriaUI, PizzeriaManagerUI commandManagerUI) {
         this.database = database;
@@ -83,6 +84,10 @@ public class DeliveryUI extends JFrame {
         add(panel);
     }
 
+    public void setPizzeriaUI(PizzeriaUI pizzeriaUI) {
+        this.pizzeriaUI = pizzeriaUI;
+    }
+
     public void ChangeLivreur(Livreur livreur) {
         order = database.getOrderByLivreur(livreur);
         orderListModel.clear();
@@ -121,6 +126,7 @@ public class DeliveryUI extends JFrame {
             orderListModel.remove(0);
             database.markAsDelivered(order.getId());
             commandManagerUI.refreshOrders();
+            pizzeriaUI.updateUserBalance();
         } else {
             JOptionPane.showMessageDialog(mainPizzeriaUI, "Il n'y a pas de commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }

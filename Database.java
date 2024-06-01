@@ -169,6 +169,20 @@ public class Database {
         return livreursLibres;
     }
 
+    public void refreshClientSolde(Client client) {
+        try {
+            String query = "SELECT solde FROM Clients WHERE idClient = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, client.getIdClient());
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                client.setSolde(rset.getFloat("solde"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void updateClientSolde(float newSolde) {
         try {
             newSolde = Math.round(newSolde * 100) / 100.0f;

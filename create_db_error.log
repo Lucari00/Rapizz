@@ -902,3 +902,32 @@ Error executing 'INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
 24/54/2024 10:54:25
 -------
 
+
+-------
+01/35/2024 16:35:09
+-------
+
+
+-------
+01/35/2024 16:35:14
+-------
+
+
+-------
+01/35/2024 16:35:14
+-------
+
+
+-------
+01/35/2024 16:35:16
+-------
+
+
+-------
+01/36/2024 16:36:43
+-------
+
+Error executing 'INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
+('Margherita', 8.99),
+('Pepperoni', 9.99),
+('4 Fromages', 10.99) ' (line 5): Duplicate entry 'Margherita' for key 'pizzas.nomPizza'
