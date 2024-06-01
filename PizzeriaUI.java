@@ -18,10 +18,16 @@ public class PizzeriaUI extends JFrame {
     private PizzeriaManagerUI commandManagerUI;
     private DeliveryUI deliveryUI;
 
-    public PizzeriaUI(Database database, PizzeriaManagerUI commandManagerUI, DeliveryUI deliveryUI) {
+    private MainPizzeriaUI mainPizzeriaUI;
+    private JButton viewIngredientsButton;
+    private JButton addBalanceButton;
+
+    public PizzeriaUI(Database database, MainPizzeriaUI mainPizzeriaUI, PizzeriaManagerUI commandManagerUI, DeliveryUI deliveryUI) {
         this.database = database;
         this.commandManagerUI = commandManagerUI;
         this.deliveryUI = deliveryUI;
+        this.mainPizzeriaUI = mainPizzeriaUI;
+
         // Configurer la fenêtre principale
         setTitle("Pizzeria");
         setSize(400, 300);
@@ -88,7 +94,22 @@ public class PizzeriaUI extends JFrame {
             }
         });
 
-        
+        viewIngredientsButton = new JButton("Voir Ingrédients");
+        viewIngredientsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showIngredients();
+            }
+        });
+
+        addBalanceButton = new JButton("Ajouter au solde");
+        addBalanceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showAddBalancePopup();
+            }
+        });
+
         // Disposer les composants dans un panneau
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -100,6 +121,9 @@ public class PizzeriaUI extends JFrame {
 
         gbc.gridx = 1;
         panel.add(pizzaComboBox, gbc);
+
+        gbc.gridx = 2; // Placer le bouton "Voir Ingrédients" à droite de la pizza sélectionnée
+        panel.add(viewIngredientsButton, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -129,6 +153,9 @@ public class PizzeriaUI extends JFrame {
         gbc.gridx = 1;
         panel.add(userBalanceLabel, gbc);
 
+        gbc.gridx = 2;
+        panel.add(addBalanceButton, gbc); // Ajouter le bouton à côté du solde
+
         gbc.gridx = 1;
         gbc.gridy = 5;
         panel.add(orderButton, gbc);
@@ -139,7 +166,7 @@ public class PizzeriaUI extends JFrame {
         gbc.gridheight = 1;
         JScrollPane scrollPane = new JScrollPane(orderSummaryTextArea);
         //scrollPane.setVerticalScrollBarPolicy(JScrollPane); // Définir la politique d'ajustement
-        panel.add(scrollPane, gbc);
+        //panel.add(scrollPane, gbc);
 
         // Ajouter le panneau à la fenêtre
         add(panel);
@@ -147,6 +174,66 @@ public class PizzeriaUI extends JFrame {
         updatePizzaPrice(pizzaList, tailleList);
         updateUserBalance(clientList);
     }
+
+    private void showAddBalancePopup() {
+        String inputValue = JOptionPane.showInputDialog(mainPizzeriaUI, "Entrez le montant à ajouter:", "Ajouter au solde", JOptionPane.PLAIN_MESSAGE);
+        if (inputValue != null) {
+            try {
+                float amountToAdd = Float.parseFloat(inputValue);
+                if (amountToAdd < 0) {
+                    JOptionPane.showMessageDialog(mainPizzeriaUI, "Le montant doit être positif.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Client client = database.getClient();
+                client.setSolde(client.getSolde() + amountToAdd);
+                database.updateClientSolde(client.getSolde()); // Mettre à jour le solde dans la base de données
+                userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Solde mis à jour avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez entrer un nombre valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void showIngredients() {
+        String selectedPizzaName = (String) pizzaComboBox.getSelectedItem();
+        if (selectedPizzaName == null) {
+            JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez sélectionner une pizza.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Rechercher l'objet Pizza correspondant au nom sélectionné
+        List<Pizza> pizzaList = database.getPizzas();
+        Pizza selectedPizza = null;
+        for (Pizza pizza : pizzaList) {
+            if (pizza.getName().equals(selectedPizzaName)) {
+                selectedPizza = pizza;
+                break;
+            }
+        }
+    
+        if (selectedPizza == null) {
+            JOptionPane.showMessageDialog(mainPizzeriaUI, "Pizza non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // Obtenir les ingrédients de la pizza sélectionnée
+        List<String> ingredients = database.getIngredients(selectedPizza);
+    
+        // Construire le message des ingrédients
+        StringBuilder ingredientsMessage = new StringBuilder("Ingrédients de la pizza " + selectedPizzaName + ":\n");
+        for (String ingredient : ingredients) {
+            ingredientsMessage.append("- ").append(ingredient).append("\n");
+        }
+    
+        // Afficher les ingrédients dans une popup
+        JOptionPane.showMessageDialog(mainPizzeriaUI, ingredientsMessage.toString(), "Ingrédients", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+       
+    
 
     public void Refresh() {
         List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
@@ -223,24 +310,38 @@ public class PizzeriaUI extends JFrame {
         String selectedTaille = (String) sizeComboBox.getSelectedItem();
 
         // ajouter dans la base de donnée la commande
-        boolean hasPassed = database.addOrder(selectedPizza, selectedTaille, finalPrice);
+        String orderString = database.addOrder(selectedPizza, selectedTaille, finalPrice);
 
         // Créer un StringBuilder pour construire le résumé de la commande
         StringBuilder orderSummary = new StringBuilder();
-        if (hasPassed) {
-            orderSummary.append("Vous avez commandé une pizza ").append(selectedPizza).append(" de taille ").append(selectedTaille).append(" au prix de ").append(finalPrice).append(" €.");
+        switch (orderString) {
+            case "noFunds":
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Erreur avec la commande pas assez de fonds.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                break;
+        
+            case "noLivreur":
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Erreur avec la commande pas de livreur disponible.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                break;
 
-            // update user balance
+            case "success":
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Vous avez commandé une pizza " + selectedPizza + " de taille " + selectedTaille + " au prix de " + finalPrice + " €.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                break;
+
+            case "free":
+                JOptionPane.showMessageDialog(mainPizzeriaUI, "Bravo, vous avez gagné une pizza gratuite pour en avoir commandé 10 !", "Félicitation !", JOptionPane.INFORMATION_MESSAGE);
+                break;
+            default:
+                break;
+        }
+
+
+        if (orderString == "success" || orderString == "free") {
             Client client = database.getClient();
             userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
             commandManagerUI.refreshOrders();
             deliveryUI.refreshOrders();
-        } else {
-            orderSummary.append("Erreur avec la commande ou fonds insuffisants ou plus de livreurs disponibles.\n");
         }
-        
-
-        orderSummaryTextArea.setText(orderSummary.toString());
+        //orderSummaryTextArea.setText(orderSummary.toString());
     }
 
     public static void main(String[] args) {

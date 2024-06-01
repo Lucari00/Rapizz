@@ -169,7 +169,7 @@ public class Database {
         return livreursLibres;
     }
 
-    private void updateClientSolde(float newSolde) {
+    public void updateClientSolde(float newSolde) {
         try {
             newSolde = Math.round(newSolde * 100) / 100.0f;
             String updateClientQuery = "UPDATE Clients SET solde = ? WHERE idClient = ?";
@@ -189,7 +189,24 @@ public class Database {
         }
     }
 
-    public boolean addOrder(String selectedPizzaString, String selectedSizeString, float price) {
+    public int getNombreCommandesByClient(Client client) {
+        int nombreCommandes = 0;
+        try {
+            // compte le nombre de commande du client dans la table commandes
+            String query = "SELECT COUNT(*) FROM Commandes WHERE idClient = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, client.getIdClient());
+            ResultSet rset = pstmt.executeQuery();
+            if (rset.next()) {
+                nombreCommandes = rset.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return nombreCommandes;
+    }
+
+    public String addOrder(String selectedPizzaString, String selectedSizeString, float price) {
         try {
             List<Pizza> pizzaList = getPizzas();
             Pizza selectedPizza = null;
@@ -213,17 +230,24 @@ public class Database {
 
             if (livreurs.isEmpty()) {
                 System.out.println("Aucun livreur disponible.");
-                return false;
+                return "noLivreur";
             }
 
+            System.out.println(client.getSolde());
             if (client.getSolde() < selectedPizza.getPrice()) {
                 System.out.println("Fonds insuffisants.");
-                return false;
+                return "noFunds";
+            }
+
+            // check if the user has 10 orders and the next one is free
+            int nombreCommandes = getNombreCommandesByClient(client);
+            if (nombreCommandes % 10 == 0 && nombreCommandes != 0) {
+                price = 0;
             }
 
             String insertOrderQuery = "INSERT INTO Commandes (prixCommande, idLivreur, idClient) VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertOrderQuery);
-            pstmt.setFloat(1, selectedPizza.getPrice());
+            pstmt.setFloat(1, price);
             pstmt.setInt(2, livreurs.get(0).getIdLivreur());
             pstmt.setInt(3, client.getIdClient());
 
@@ -241,19 +265,82 @@ public class Database {
                 // insert into PizzaCommande
                 addPizzaCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommande);
 
-                updateClientSolde(client.getSolde() - selectedPizza.getPrice());
+                updateClientSolde(client.getSolde() - price);
 
                 System.out.println("Commande créée avec succès.");
-                return true;
+                if (price == 0) {
+                    return "free";
+                } else {
+                    return "success";
+                }
             } else {
                 System.out.println("Erreur lors de la création de la commande.");
-                return false;
+                return "error";
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return "error";
         }
     }
+
+    public List<String> getMostAndLeastOrderedPizzas() {
+        List<String> result = new ArrayList<>();
+        String mostOrderedQuery = "SELECT p.nomPizza, COUNT(pc.idPizza) AS order_count " +
+                                  "FROM PizzaCommande pc " +
+                                  "JOIN Pizzas p ON pc.idPizza = p.idPizza " +
+                                  "GROUP BY p.nomPizza " +
+                                  "ORDER BY order_count DESC " +
+                                  "LIMIT 1";
+
+        String leastOrderedQuery = "SELECT p.nomPizza, COUNT(pc.idPizza) AS order_count " +
+                                   "FROM PizzaCommande pc " +
+                                   "JOIN Pizzas p ON pc.idPizza = p.idPizza " +
+                                   "GROUP BY p.nomPizza " +
+                                   "ORDER BY order_count ASC " +
+                                   "LIMIT 1";
+
+        try (PreparedStatement mostStmt = connection.prepareStatement(mostOrderedQuery);
+             PreparedStatement leastStmt = connection.prepareStatement(leastOrderedQuery)) {
+
+            ResultSet mostResultSet = mostStmt.executeQuery();
+            if (mostResultSet.next()) {
+                result.add("La pizza la plus demandée : " + mostResultSet.getString("nomPizza"));
+            }
+
+            ResultSet leastResultSet = leastStmt.executeQuery();
+            if (leastResultSet.next()) {
+                result.add("La pizza la moins demandée : " + leastResultSet.getString("nomPizza"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Gérer l'erreur de manière appropriée
+        }
+
+        return result;
+    }
+
+    public List<String> getIngredients(Pizza pizza) {
+        List<String> ingredients = new ArrayList<>();
+        String query = "SELECT i.nomIngredient " +
+                       "FROM Ingredients i " +
+                       "JOIN IngredientPizza ip ON i.idIngredient = ip.idIngredient " +
+                       "WHERE ip.idPizza = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, pizza.getId()); // Supposons que Pizza a une méthode getId() pour obtenir son identifiant
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                ingredients.add(resultSet.getString("nomIngredient"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Gérer l'erreur de manière appropriée
+        }
+
+        return ingredients;
+    }
+
 
     public boolean markAsDelivered(int idCommande) {
         try {
@@ -501,4 +588,69 @@ public class Database {
         }
         return adresse;
     }
+
+    public List<String> getTopClients() {
+        List<String> topClients = new ArrayList<>();
+        String query = "SELECT c.nomClient, c.prenomClient, SUM(co.prixCommande) AS montantTotal " +
+                       "FROM Clients c " +
+                       "JOIN Commandes co ON c.idClient = co.idClient " +
+                       "GROUP BY c.idClient, c.nomClient, c.prenomClient " +
+                       "ORDER BY montantTotal DESC " +
+                       "LIMIT 5";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                String nom = rs.getString("nomClient");
+                String prenom = rs.getString("prenomClient");
+                float montantTotal = rs.getFloat("montantTotal");
+                topClients.add(nom + " " + prenom + ": " + montantTotal + " €");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return topClients;
+    }
+
+    public String getFavoriteIngredient() {
+        String favoriteIngredient = "";
+        String query = "SELECT i.nomIngredient, COUNT(ip.idIngredient) AS ingredient_count " +
+                       "FROM Ingredients i " +
+                       "JOIN IngredientPizza ip ON i.idIngredient = ip.idIngredient " +
+                       "GROUP BY i.idIngredient " +
+                       "ORDER BY ingredient_count DESC " +
+                       "LIMIT 1";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            if (rs.next()) {
+                favoriteIngredient = rs.getString("nomIngredient");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return favoriteIngredient;
+    }
+
+    // public void updateClientBalance(Client client) {
+    //     // update the client's balance in the database
+    //     try {
+    //         String updateClientQuery = "UPDATE Clients SET solde = ? WHERE idClient = ?";
+    //         PreparedStatement pstmt = connection.prepareStatement(updateClientQuery);
+    //         System.out.println(client.getSolde());
+    //         pstmt.setFloat(1, client.getSolde());
+    //         pstmt.setInt(2, client.getIdClient());
+
+    //         int rowsAffected = pstmt.executeUpdate();
+    //         if (rowsAffected > 0) {
+    //             System.out.println("Client updated successfully.");
+    //         } else {
+    //             System.out.println("Error updating client.");
+    //         }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 }

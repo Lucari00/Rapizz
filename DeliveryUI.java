@@ -14,10 +14,13 @@ public class DeliveryUI extends JFrame {
     private boolean isRefreshing = false;
 
     private Database database;
+    private MainPizzeriaUI mainPizzeriaUI;
+    private PizzeriaManagerUI commandManagerUI;
 
-    public DeliveryUI(Database database) {
+    public DeliveryUI(Database database, MainPizzeriaUI mainPizzeriaUI, PizzeriaManagerUI commandManagerUI) {
         this.database = database;
-        
+        this.mainPizzeriaUI = mainPizzeriaUI;
+        this.commandManagerUI = commandManagerUI;
 
         // Configurer la fenêtre principale
         setTitle("Interface Livreur de la Pizzeria");
@@ -114,15 +117,23 @@ public class DeliveryUI extends JFrame {
     }
 
     private void markAsDelivered() {
-        int selectedIndex = orderList.getSelectedIndex();
-        if (selectedIndex != -1) {
-            //String deliveredOrder = orders.remove(selectedIndex);
-            orderListModel.remove(selectedIndex);
+        if (orderList.getModel().getSize() > 0) {
+            orderListModel.remove(0);
             database.markAsDelivered(order.getId());
-            //JOptionPane.showMessageDialog(this, deliveredOrder + " a été marqué comme livré.", "Commande Livrée", JOptionPane.INFORMATION_MESSAGE);
+            commandManagerUI.refreshOrders();
         } else {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainPizzeriaUI, "Il n'y a pas de commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+        // int selectedIndex = orderList.getSelectedIndex();
+        // System.out.println("selected : " + selectedIndex);
+        // if (selectedIndex != -1) {
+        //     //String deliveredOrder = orders.remove(selectedIndex);
+        //     orderListModel.remove(selectedIndex);
+        //     database.markAsDelivered(order.getId());
+        //     //JOptionPane.showMessageDialog(this, deliveredOrder + " a été marqué comme livré.", "Commande Livrée", JOptionPane.INFORMATION_MESSAGE);
+        // } else {
+        //     JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez sélectionner une commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        // }
     }
 
 }

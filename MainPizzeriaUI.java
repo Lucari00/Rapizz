@@ -20,14 +20,14 @@ public class MainPizzeriaUI extends JFrame {
 
         // Créer les instances des interfaces
         commandManagerUI = new PizzeriaManagerUI(database);
-        deliveryUI = new DeliveryUI(database);
-        pizzeriaUI = new PizzeriaUI(database, commandManagerUI, deliveryUI);
+        deliveryUI = new DeliveryUI(database, this, commandManagerUI);
+        pizzeriaUI = new PizzeriaUI(database, this, commandManagerUI, deliveryUI);
         
         // Ajouter les interfaces à la grille
         add(createPanelWithComponent(pizzeriaUI.getContentPane(), "Interface Client"));
         add(createPanelWithComponent(commandManagerUI.getContentPane(), "Interface Gérant"));
         add(createPanelWithComponent(deliveryUI.getContentPane(), "Interface Livreur"));
-        add(createButtonPanel(database)); 
+        add(createButtonsPanel(database)); 
 
         // Rendre la fenêtre principale visible
         setVisible(true);
@@ -41,7 +41,7 @@ public class MainPizzeriaUI extends JFrame {
         return panel;
     }
 
-    private JPanel createButtonPanel(Database database) {
+    private JPanel createButtonsPanel(Database database) {
         JPanel panel = new JPanel(new FlowLayout());
         JButton button = new JButton("Reset Database");
         button.addActionListener(e -> {
@@ -98,6 +98,38 @@ public class MainPizzeriaUI extends JFrame {
             deliveryUI.Refresh();
         });
         panel.add(buttonInsertData);
+
+        JButton buttonTopClients = new JButton("Meilleurs Clients");
+        buttonTopClients.addActionListener(e -> {
+            List<String> topClients = database.getTopClients();
+            StringBuilder topClientsMessage = new StringBuilder("Les 5 meilleurs clients:\n");
+            for (String client : topClients) {
+                topClientsMessage.append(client).append("\n");
+            }
+            JOptionPane.showMessageDialog(this, topClientsMessage.toString(), "Meilleurs Clients", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonTopClients);
+
+        // Ajouter le bouton pour afficher la pizza la plus et la moins demandée
+        JButton buttonPizzaDemand = new JButton("Pizza la plus/moins demandée");
+        buttonPizzaDemand.addActionListener(e -> {
+            List<String> pizzaDemand = database.getMostAndLeastOrderedPizzas();
+            StringBuilder pizzaDemandMessage = new StringBuilder();
+            for (String pizza : pizzaDemand) {
+                pizzaDemandMessage.append(pizza).append("\n");
+            }
+            JOptionPane.showMessageDialog(this, pizzaDemandMessage.toString(), "Pizza la plus/moins demandée", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonPizzaDemand);
+
+        JButton buttonFavoriteIngredient = new JButton("Ingrédient Favori");
+        buttonFavoriteIngredient.addActionListener(e -> {
+            String favoriteIngredient = database.getFavoriteIngredient();
+            String message = "L'ingrédient favori est : " + favoriteIngredient;
+            JOptionPane.showMessageDialog(this, message, "Ingrédient Favori", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonFavoriteIngredient);
+
         return panel;
     }
 

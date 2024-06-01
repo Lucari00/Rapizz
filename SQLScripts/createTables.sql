@@ -110,7 +110,7 @@ BEGIN
    DECLARE tempsLivraison INT;
    DECLARE prixCmde DECIMAL(15,2);
    DECLARE idClt INT;
-   
+
    -- Mettre à jour la date de livraison
    UPDATE Commandes
    SET dateLivree = current_timestamp
@@ -122,7 +122,7 @@ BEGIN
    WHERE idCommande = idCmde;
 
    -- Si le temps de livraison est supérieur à 30 minutes, rembourser le client et mettre à jour le prix de la commande
-   IF tempsLivraison > 30 THEN
+   IF tempsLivraison > 1 THEN
       SELECT prixCommande, idClient INTO prixCmde, idClt
       FROM Commandes
       WHERE idCommande = idCmde;
