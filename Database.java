@@ -10,7 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class Database {
@@ -636,23 +638,148 @@ public class Database {
         return favoriteIngredient;
     }
 
-    // public void updateClientBalance(Client client) {
-    //     // update the client's balance in the database
-    //     try {
-    //         String updateClientQuery = "UPDATE Clients SET solde = ? WHERE idClient = ?";
-    //         PreparedStatement pstmt = connection.prepareStatement(updateClientQuery);
-    //         System.out.println(client.getSolde());
-    //         pstmt.setFloat(1, client.getSolde());
-    //         pstmt.setInt(2, client.getIdClient());
+    public Map<String, Float> getRevenueByDay() {
+        String query = "SELECT DATE(dateCommande) AS date, SUM(prixCommande) AS revenue FROM Commandes GROUP BY DATE(dateCommande)";
+        Map<String, Float> dailyRevenues = new HashMap<>();
 
-    //         int rowsAffected = pstmt.executeUpdate();
-    //         if (rowsAffected > 0) {
-    //             System.out.println("Client updated successfully.");
-    //         } else {
-    //             System.out.println("Error updating client.");
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                String date = rs.getString("date");
+                float revenue = rs.getFloat("revenue");
+                dailyRevenues.put(date, revenue);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return dailyRevenues;
+    }
+
+    public String getWorstDeliveryPerson() {
+        String query = 
+            "SELECT L.nomLivreur, L.prenomLivreur, V.Marque, V.nomVehicule, COUNT(*) AS retardCount " +
+            "FROM Commandes C " +
+            "JOIN Livreurs L ON C.idLivreur = L.idLivreur " +
+            "JOIN Vehicules V ON L.idVehicule = V.idVehicule " +
+            "WHERE C.dateLivree > DATE_ADD(C.dateCommande, INTERVAL 30 MINUTE)  " + 
+            "GROUP BY L.nomLivreur, L.prenomLivreur, V.Marque, V.nomVehicule " +
+            "ORDER BY retardCount DESC " +
+            "LIMIT 1";
+
+        StringBuilder message = new StringBuilder();
+
+        try (Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query)) {
+
+            if (rs.next()) {
+                message.append("Le pire livreur est : ").append(rs.getString("nomLivreur")).append(" ").append(rs.getString("prenomLivreur")).append("\n");
+                message.append("Véhicule : ").append(rs.getString("Marque")).append(" ").append(rs.getString("nomVehicule")).append("\n");
+                message.append("Nombre de retards : ").append(rs.getString("retardCount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return message.toString();
+    }
+
+    public List<String> getUnusedVehicles() {
+        String query = 
+            "SELECT V.Marque, V.nomVehicule " +
+            "FROM Vehicules V " +
+            "LEFT JOIN Livreurs L ON V.idVehicule = L.idVehicule " +
+            "LEFT JOIN Commandes C ON L.idLivreur = C.idLivreur " +
+            "WHERE C.idCommande IS NULL";
+
+        List<String> unusedVehicles = new ArrayList<>();
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                String vehicleInfo = rs.getString("Marque") + " " + rs.getString("nomVehicule");
+                unusedVehicles.add(vehicleInfo);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return unusedVehicles;
+    }
+
+    public Map<String, Integer> getNumberOfOrdersPerClient() {
+        String query = 
+            "SELECT C.nomClient, C.prenomClient, COUNT(*) AS orderCount " +
+            "FROM Commandes Co " +
+            "JOIN Clients C ON Co.idClient = C.idClient " +
+            "GROUP BY C.nomClient, C.prenomClient";
+    
+        Map<String, Integer> ordersPerClient = new HashMap<>();
+    
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+    
+            while (rs.next()) {
+                String clientName = rs.getString("nomClient") + " " + rs.getString("prenomClient");
+                int orderCount = rs.getInt("orderCount");
+                ordersPerClient.put(clientName, orderCount);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return ordersPerClient;
+    }
+
+    public double getAverageNumberOfOrders() {
+        String query = 
+            "SELECT AVG(orderCount) AS averageOrders " +
+            "FROM (SELECT COUNT(*) AS orderCount " +
+            "      FROM Commandes " +
+            "      GROUP BY idClient) AS clientOrders";
+    
+        double averageOrders = 0;
+    
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+    
+            if (rs.next()) {
+                averageOrders = rs.getDouble("averageOrders");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return averageOrders;
+    }
+    
+    public List<String> getClientsWithMoreThanAverageOrders() {
+        double averageOrders = getAverageNumberOfOrders();
+        String query = 
+            "SELECT C.nomClient, C.prenomClient " +
+            "FROM Clients C " +
+            "JOIN Commandes Co ON C.idClient = Co.idClient " +
+            "GROUP BY C.nomClient, C.prenomClient " +
+            "HAVING COUNT(Co.idCommande) > ?";
+    
+        List<String> clients = new ArrayList<>();
+    
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setDouble(1, averageOrders);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String clientName = rs.getString("nomClient") + " " + rs.getString("prenomClient");
+                    clients.add(clientName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return clients;
+    }
+    
+    
 }

@@ -43,12 +43,6 @@ INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
 ('Lefebvre', 'Julie', 2),
 ('Moreau', 'Luc', 3);
 
--- Insertion des données dans la table Commandes
-INSERT INTO Commandes (prixCommande, dateCommande, dateLivree, tempsLivraison, idLivreur, idClient) VALUES
-(26.97, '2021-01-01 12:00:00', '2021-01-01 12:30:00', 30, 1, 1),
-(19.98, '2021-01-02 12:00:00', '2021-01-02 12:20:00', 20, 2, 2),
-(43.96, '2021-01-03 12:00:00', '2021-01-03 12:40:00', 40, 3, 3);
-
 -- Insertion des données dans la table IngredientPizza
 INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
 (1, 1),
@@ -61,9 +55,3 @@ INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
 (3, 2),
 (3, 4),
 (3, 5);
-
--- Insertion des données dans la table PizzaCommande
-INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES
-(1, 'Petite', 1),
-(2, 'Moyenne', 2),
-(3, 'Grande', 3);

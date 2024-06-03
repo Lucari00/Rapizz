@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainPizzeriaUI extends JFrame {
     private PizzeriaManagerUI commandManagerUI;
@@ -129,6 +130,85 @@ public class MainPizzeriaUI extends JFrame {
             JOptionPane.showMessageDialog(this, message, "Ingrédient Favori", JOptionPane.INFORMATION_MESSAGE);
         });
         panel.add(buttonFavoriteIngredient);
+
+        JButton buttonRevenueFigure = new JButton("Chiffre d'affaire");
+        buttonRevenueFigure.addActionListener(e -> {
+            Map<String, Float> revenuesByDay = database.getRevenueByDay();
+            
+            StringBuilder message = new StringBuilder("Chiffre d'affaire par jour:\n");
+            for (Map.Entry<String, Float> entry : revenuesByDay.entrySet()) {
+                message.append(entry.getKey()).append(": ").append(entry.getValue()).append("€\n");
+            }
+
+            JOptionPane.showMessageDialog(this, message, "Chiffre d'affaire", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonRevenueFigure);
+
+        JButton buttonWorstDelevery = new JButton("Pire Livreur");
+        buttonWorstDelevery.addActionListener(e -> {
+            String worstDelivery = database.getWorstDeliveryPerson();
+            if (worstDelivery == "") {
+                worstDelivery = "Aucun livreur n'a effectué de livraison en retard.";
+            }
+            JOptionPane.showMessageDialog(this, worstDelivery, "Pire Livreur", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonWorstDelevery);
+
+        JButton buttonUnusedVehicles = new JButton("Véhicles non utilisés");
+        buttonUnusedVehicles.addActionListener(e -> {
+            List<String> unusedVehicles = database.getUnusedVehicles();
+            StringBuilder message = new StringBuilder();
+            if (unusedVehicles.size() != 0) {
+                message.append("Les véhicules non utilisés :\n");
+                for (String vehicle : unusedVehicles) {
+                    message.append(" - "+vehicle+"\n");
+                }
+            } else {
+               message.append("Tous les véhicules ont été utilisés.");
+            }
+            JOptionPane.showMessageDialog(this, message.toString(), "Véhicles non utilisés", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonUnusedVehicles);
+
+        JButton buttonOrdersPerClient = new JButton("Nombre de commandes par client");
+        buttonOrdersPerClient.addActionListener(e -> {
+            Map<String, Integer> ordersPerClient = database.getNumberOfOrdersPerClient();
+            StringBuilder message = new StringBuilder();
+            if (!ordersPerClient.isEmpty()) {
+                message.append("Nombre de commandes par client :\n");
+                for (Map.Entry<String, Integer> entry : ordersPerClient.entrySet()) {
+                    message.append(" - "+entry.getKey()+": "+entry.getValue()+"\n");
+                }
+            } else {
+                message.append("Aucun client n'a passé de commande.");
+            }
+            JOptionPane.showMessageDialog(this, message.toString(), "Nombre de commandes par client", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonOrdersPerClient);
+
+        JButton buttonAverageNumberOfCommand = new JButton("Nombre moyen de commandes par jour");
+        buttonAverageNumberOfCommand.addActionListener(e -> {
+            double averageNumberOfCommand = database.getAverageNumberOfOrders();
+            String message = "Le nombre moyen de commandes par jour est de : " + averageNumberOfCommand;
+            JOptionPane.showMessageDialog(this, message, "Nombre moyen de commandes par jour", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonAverageNumberOfCommand);
+
+        JButton buttonAverageRevenue = new JButton("Clients au dessus de la moyenne des commandes");
+        buttonAverageRevenue.addActionListener(e -> {
+            List<String> clientsAboveAverage = database.getClientsWithMoreThanAverageOrders();
+            StringBuilder message = new StringBuilder();
+            if (clientsAboveAverage.size() != 0) {
+                message.append("Les clients dont le nombre de commandes est supérieur à la moyenne :\n");
+                for (String client : clientsAboveAverage) {
+                    message.append(" - "+client+"\n");
+                }
+            } else {
+                message.append("Aucun client n'a un chiffre d'affaire supérieur à la moyenne.");
+            }
+            JOptionPane.showMessageDialog(this, message.toString(), "Clients au dessus de la moyenne des commandes", JOptionPane.INFORMATION_MESSAGE);
+        });
+        panel.add(buttonAverageRevenue);
 
         return panel;
     }
