@@ -20,10 +20,10 @@ INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
 ('Grande', 1.33);
 
 -- Insertion des données dans la table Clients
-INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde, nombreCommandes) VALUES
-('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00, 3),
-('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00, 2),
-('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00, 4);
+INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde) VALUES
+('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00),
+('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00),
+('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00);
 
 -- Insertion des données dans la table TypeVehicules
 INSERT INTO TypeVehicules (type, distance) VALUES

@@ -23,6 +23,7 @@ public class MainPizzeriaUI extends JFrame {
         commandManagerUI = new PizzeriaManagerUI(database);
         deliveryUI = new DeliveryUI(database, this, commandManagerUI);
         pizzeriaUI = new PizzeriaUI(database, this, commandManagerUI, deliveryUI);
+        deliveryUI.setPizzeriaUI(pizzeriaUI);
         
         // Ajouter les interfaces à la grille
         add(createPanelWithComponent(pizzeriaUI.getContentPane(), "Interface Client"));

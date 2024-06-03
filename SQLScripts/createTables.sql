@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS Clients(
    prenomClient VARCHAR(50) NOT NULL,
    adresseClient VARCHAR(100) NOT NULL,
    solde DECIMAL(15,2) CHECK (solde >= 0),
-   nombreCommandes INT NOT NULL,
    PRIMARY KEY(idClient)
 );
 
@@ -58,10 +57,8 @@ CREATE TABLE IF NOT EXISTS Livreurs(
 CREATE TABLE IF NOT EXISTS Commandes(
    idCommande INT AUTO_INCREMENT,
    prixCommande DECIMAL(15,2) NOT NULL CHECK (prixCommande >= 0),
-   tempsLivraison DECIMAL(15,2),
    dateCommande DATETIME NOT NULL DEFAULT current_timestamp,
    dateLivree DATETIME,
-   estGratuit BOOLEAN NOT NULL DEFAULT false,
    idLivreur INT NOT NULL,
    idClient INT NOT NULL,
    PRIMARY KEY(idCommande),
@@ -93,14 +90,50 @@ CREATE TRIGGER IF NOT EXISTS check_livreur_commande
 BEFORE INSERT ON Commandes
 FOR EACH ROW
 BEGIN
-    DECLARE livreurCount INT;
+   DECLARE livreurCount INT;
 
-    SELECT COUNT(*) INTO livreurCount 
-    FROM Commandes
-    WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+   -- Vérifier si le livreur a déjà une commande en cours
+   SELECT COUNT(*) INTO livreurCount 
+   FROM Commandes
+   WHERE idLivreur = NEW.idLivreur AND dateLivree IS NULL;
+   IF livreurCount > 0 THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+   END IF;
+END$$
 
-    IF livreurCount > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Un livreur ne peut pas avoir plus d''une commande en cours';
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE IF NOT EXISTS update_commande_livree(IN idCmde INT)
+BEGIN
+   DECLARE tempsLivraison INT;
+   DECLARE prixCmde DECIMAL(15,2);
+   DECLARE idClt INT;
+
+   -- Mettre à jour la date de livraison
+   UPDATE Commandes
+   SET dateLivree = current_timestamp
+   WHERE idCommande = idCmde;
+
+   -- Calculer le temps de livraison
+   SELECT TIMESTAMPDIFF(MINUTE, dateCommande, dateLivree) INTO tempsLivraison
+   FROM Commandes
+   WHERE idCommande = idCmde;
+
+   -- Si le temps de livraison est supérieur à 30 minutes, rembourser le client et mettre à jour le prix de la commande
+   IF tempsLivraison > 30 THEN
+      SELECT prixCommande, idClient INTO prixCmde, idClt
+      FROM Commandes
+      WHERE idCommande = idCmde;
+
+      UPDATE Commandes
+      SET prixCommande = 0
+      WHERE idCommande = idCmde;
+
+      UPDATE Clients
+      SET solde = solde + prixCmde
+      WHERE idClient = idClt;
     END IF;
 END$$
 

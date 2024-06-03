@@ -13,7 +13,6 @@ public class Client {
         this.prenomClient = prenomClient;
         this.adresseClient = adresseClient;
         this.solde = solde;
-        this.nombreCommandes = 0;
     }
 
     // Getters et Setters
@@ -57,14 +56,6 @@ public class Client {
         this.solde = solde;
     }
 
-    public int getNombreCommandes() {
-        return nombreCommandes;
-    }
-
-    public void setNombreCommandes(int nombreCommandes) {
-        this.nombreCommandes = nombreCommandes;
-    }
-
     // Méthode toString pour l'affichage
     @Override
     public String toString() {
@@ -74,7 +65,6 @@ public class Client {
                 ", prenomClient='" + prenomClient + '\'' +
                 ", adresseClient='" + adresseClient + '\'' +
                 ", solde=" + solde +
-                ", nombreCommandes=" + nombreCommandes +
                 '}';
     }
 }
