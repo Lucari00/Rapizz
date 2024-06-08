@@ -302,18 +302,18 @@ public class Database {
     public List<String> getMostAndLeastOrderedPizzas() {
         List<String> result = new ArrayList<>();
         String mostOrderedQuery = "SELECT p.nomPizza, COUNT(pc.idPizza) AS order_count " +
-                                  "FROM PizzaCommande pc " +
-                                  "JOIN Pizzas p ON pc.idPizza = p.idPizza " +
-                                  "GROUP BY p.nomPizza " +
-                                  "ORDER BY order_count DESC " +
-                                  "LIMIT 1";
+                          "FROM Pizzas p " +
+                          "LEFT JOIN PizzaCommande pc ON p.idPizza = pc.idPizza " +
+                          "GROUP BY p.nomPizza " +
+                          "ORDER BY order_count DESC " +
+                          "LIMIT 1";
 
         String leastOrderedQuery = "SELECT p.nomPizza, COUNT(pc.idPizza) AS order_count " +
-                                   "FROM PizzaCommande pc " +
-                                   "JOIN Pizzas p ON pc.idPizza = p.idPizza " +
-                                   "GROUP BY p.nomPizza " +
-                                   "ORDER BY order_count ASC " +
-                                   "LIMIT 1";
+                          "FROM Pizzas p " +
+                          "LEFT JOIN PizzaCommande pc ON p.idPizza = pc.idPizza " +
+                          "GROUP BY p.nomPizza " +
+                          "ORDER BY order_count ASC " +
+                          "LIMIT 1";
 
         try (PreparedStatement mostStmt = connection.prepareStatement(mostOrderedQuery);
              PreparedStatement leastStmt = connection.prepareStatement(leastOrderedQuery)) {
