@@ -78,9 +78,9 @@ INSERT INTO TypeVehicules (type, distance) VALUES
 
 -- Insertion des données dans la table Vehicules
 INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
-('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
-('Peugeot', 'VTT', 'EF-456-GH', 'Velo'),
-('Honda', 'CBR', 'IJ-789-KL', 'Moto');
+('Toyota', 'Corolla', 'AB-123-CD', (SELECT type FROM TypeVehicules WHERE type = 'Voiture')),
+('Peugeot', 'VTT', 'EF-456-GH', (SELECT type FROM TypeVehicules WHERE type = 'Vélo')),
+('Honda', 'CBR', 'IJ-789-KL', (SELECT type FROM TypeVehicules WHERE type = 'Moto'));
 
 -- Insertion des données dans la table Livreurs
 INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
