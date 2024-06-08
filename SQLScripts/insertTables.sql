@@ -1,17 +1,62 @@
 -- Insertion des données dans la table Pizzas
 INSERT INTO Pizzas (nomPizza, prixPizza) VALUES
-('Margherita', 8.99),
-('Pepperoni', 9.99),
-('4 Fromages', 10.99);
+('Savoyarde', 12.00),
+('Nicoise', 11.50),
+('Provencale', 10.00),
+('Basquaise', 13.00),
+('Alsacienne', 14.00);
 
 -- Insertion des données dans la table Ingredients
 INSERT INTO Ingredients (stock, nomIngredient) VALUES
+(100, 'Creme Fraiche'),
+(100, 'Mozzarella'),
+(100, 'Reblochon'),
+(100, 'Pomme de Terre'),
 (100, 'Tomate'),
-(150, 'Mozzarella'),
-(120, 'Pepperoni'),
-(80, 'Champignons'),
-(90, 'Oignons'),
-(110, 'Olives');
+(100, 'Olive Noire'),
+(100, 'Anchois'),
+(100, 'Poivron'),
+(100, 'Jambon de Bayonne'),
+(100, 'Piment d'' Espelette'),
+(100, 'Lardon'),
+(100, 'Oignon');
+
+-- Insertion des données dans la table IngredientPizza
+-- Savoyarde
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Savoyarde'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Creme Fraiche')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Savoyarde'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Lardon')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Savoyarde'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Reblochon')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Savoyarde'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Pomme de Terre'));
+
+-- Nicoise
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Nicoise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Tomate')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Nicoise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Olive Noire')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Nicoise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Anchois')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Nicoise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Poivron'));
+
+-- Provencale
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Provencale'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Tomate')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Provencale'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Mozzarella')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Provencale'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Olive Noire')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Provencale'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Poivron'));
+
+-- Basquaise
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Basquaise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Tomate')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Basquaise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Jambon de Bayonne')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Basquaise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Piment d'' Espelette')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Basquaise'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Olive Noire'));
+
+-- Alsacienne
+INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Alsacienne'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Creme Fraiche')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Alsacienne'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Mozzarella')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Alsacienne'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Lardon')),
+((SELECT idPizza FROM Pizzas WHERE nomPizza = 'Alsacienne'), (SELECT idIngredient FROM Ingredients WHERE nomIngredient = 'Oignon'));
+
 
 -- Insertion des données dans la table Tailles
 INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
@@ -40,18 +85,5 @@ INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUE
 -- Insertion des données dans la table Livreurs
 INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES
 ('Dubois', 'Philippe', 1),
-('Lefebvre', 'Julie', 2),
+('Villani', 'Julie', 2),
 ('Moreau', 'Luc', 3);
-
--- Insertion des données dans la table IngredientPizza
-INSERT INTO IngredientPizza (idPizza, idIngredient) VALUES
-(1, 1),
-(1, 2),
-(1, 6),
-(2, 1),
-(2, 3),
-(2, 6),
-(3, 1),
-(3, 2),
-(3, 4),
-(3, 5);
