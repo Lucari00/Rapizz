@@ -68,7 +68,7 @@ INSERT INTO Tailles (nomTaille, prixMultiplicatif) VALUES
 INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde) VALUES
 ('Dupont', 'Jean', '1 rue de la Paix, Paris', 50.00),
 ('Martin', 'Sophie', '15 avenue des Lilas, Lyon', 35.00),
-('Durand', 'Pierre', '8 rue de la République, Marseille', 75.00);
+('Durand', 'Pierre', '8 rue de la Republique, Marseille', 75.00);
 
 -- Insertion des données dans la table TypeVehicules
 INSERT INTO TypeVehicules (type, distance) VALUES
@@ -79,7 +79,7 @@ INSERT INTO TypeVehicules (type, distance) VALUES
 -- Insertion des données dans la table Vehicules
 INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES
 ('Toyota', 'Corolla', 'AB-123-CD', 'Voiture'),
-('Peugeot', 'VTT', 'EF-456-GH', 'Vélo'),
+('Peugeot', 'VTT', 'EF-456-GH', 'Velo'),
 ('Honda', 'CBR', 'IJ-789-KL', 'Moto');
 
 -- Insertion des données dans la table Livreurs
