@@ -1,11 +1,9 @@
-import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
 
 public class Order {
     private int id;
     private float price;
-    private String date;
-    private boolean isFree;
     private int delivererId;
     private int clientId;
     private Timestamp dateOrdered;
@@ -36,10 +34,6 @@ public class Order {
         return price;
     }
 
-    public String getDate() {
-        return date;
-    }
-
     public int getDelivererId() {
         return delivererId;
     }
@@ -52,13 +46,15 @@ public class Order {
         return "Order{\n" +
                 "   id=" + id +
                 ", \n" + "  price=" + price +
-                ", \n" + "  date='" + date + '\'' +
+                ", \n" + "  date='" + dateOrdered.toString() + '\'' +
                 ", \n" + "  delivererId=" + delivererId +
                 ", \n" + "  clientId=" + clientId +
                 ", \n" + "}";
     }
 
     public String toStringDelivered() {
+        long minutesBetween = ChronoUnit.MINUTES.between(dateOrdered.toLocalDateTime(), dateDelivered.toLocalDateTime());
+        boolean estEnRetard = minutesBetween > 30;
         return "Order{\n" +
                 "   id=" + id +
                 ", \n" + "  price=" + price +
@@ -66,6 +62,7 @@ public class Order {
                 ", \n" + "  dateDelivered=" + dateDelivered.toString() +
                 ", \n" + "  delivererId=" + delivererId +
                 ", \n" + "  clientId=" + clientId +
+                ", \n" + "  estEnRetard=" + estEnRetard +
                 ", \n" + "}";
     }
 }

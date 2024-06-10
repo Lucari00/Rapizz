@@ -677,7 +677,7 @@ public class Database {
             "FROM Commandes C " +
             "JOIN Livreurs L ON C.idLivreur = L.idLivreur " +
             "JOIN Vehicules V ON L.idVehicule = V.idVehicule " +
-            "WHERE TIMESTAMPDIFF(MINUTE, c.dateCommande, c.dateLivree) > 30 " + 
+            "WHERE TIMESTAMPDIFF(MINUTE, c.dateCommande, c.dateLivree) > 30 " + // retard
             "GROUP BY L.nomLivreur, L.prenomLivreur, V.Marque, V.nomVehicule " +
             "ORDER BY retardCount DESC " +
             "LIMIT 1";
