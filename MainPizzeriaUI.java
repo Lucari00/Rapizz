@@ -61,28 +61,32 @@ public class MainPizzeriaUI extends JFrame {
             List<String> lastNames = new ArrayList<>();
             lastNames.add("Palaysi");
             lastNames.add("Philippe");
-            lastNames.add("Test");
-            lastNames.add("famille");
-            lastNames.add("nice");
-            lastNames.add("Luca");
-            lastNames.add("Jean");
-            lastNames.add("damien");
-            lastNames.add("prenom");
-            lastNames.add("lol");
+            lastNames.add("Chraiteh");
+            lastNames.add("Bouzidi");
+            lastNames.add("Chirac");
+            lastNames.add("Mitterand");
+            lastNames.add("Dupont");
+            lastNames.add("Durand");
+            lastNames.add("Martin");
+            lastNames.add("Bernard");
 
 
             // liste de prénom aléatoire
             List<String> firstNames = new ArrayList<>();
             firstNames.add("Luca");
             firstNames.add("Jean");
-            firstNames.add("damien");
-            firstNames.add("prenom");
-            firstNames.add("lol");
-            firstNames.add("Palaysi");
-            firstNames.add("Philippe");
-            firstNames.add("Test");
-            firstNames.add("famille");
-            firstNames.add("nice");
+            firstNames.add("Pierre");
+            firstNames.add("Paul");
+            firstNames.add("Jacques");
+            firstNames.add("Marie");
+            firstNames.add("Sophie");
+            firstNames.add("Lucie");
+            firstNames.add("Julie");
+            firstNames.add("Julien");
+            firstNames.add("Thomas");
+            firstNames.add("Alexandre");
+            firstNames.add("Alexandra");
+            firstNames.add("Alexis");
 
             // ajouter un livreur avec un nom et un prénom aléatoire
             database.addLivreur(firstNames.get((int) (Math.random() * firstNames.size())),
