@@ -50,6 +50,7 @@ public class MainPizzeriaUI extends JFrame {
             database.resetDatabase();
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
+            commandManagerUI.refreshDeliveredOrders();
             deliveryUI.Refresh();
         });
         panel.add(button);
@@ -97,6 +98,7 @@ public class MainPizzeriaUI extends JFrame {
             database.insertData();
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
+            commandManagerUI.refreshDeliveredOrders();
             deliveryUI.Refresh();
         });
         panel.add(buttonInsertData);

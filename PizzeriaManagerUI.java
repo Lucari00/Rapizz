@@ -9,7 +9,11 @@ public class PizzeriaManagerUI extends JFrame {
     private JList<String> orderList;
     private JTextArea orderDetailsTextArea;
 
-    private List<Order> orders;
+    private DefaultListModel<String> secondListModel;
+    private JList<String> secondList;
+
+    private List<Order> ordersNotDelivered;
+    private List<Order> ordersDelivered;
 
     private Database database;
 
@@ -26,7 +30,20 @@ public class PizzeriaManagerUI extends JFrame {
         orderListModel = new DefaultListModel<>();
         orderList = new JList<>(orderListModel);
         orderList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        orderList.addListSelectionListener(e -> showOrderDetails());
+        orderList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                showOrderDetails();
+            }
+        });
+
+        secondListModel = new DefaultListModel<>();
+        secondList = new JList<>(secondListModel);
+        secondList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        secondList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                showOrderDelivered();
+            }
+        });
 
         orderDetailsTextArea = new JTextArea(10, 30);
         orderDetailsTextArea.setEditable(false);
@@ -36,41 +53,64 @@ public class PizzeriaManagerUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 refreshOrders();
+                refreshDeliveredOrders();
             }
         });
 
         // Disposer les composants dans un panneau
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JPanel listsPanel = new JPanel(new GridLayout(2, 1));
+        listsPanel.add(new JScrollPane(orderList));
+        listsPanel.add(new JScrollPane(secondList));
+
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(refreshOrdersButton);
         
-        panel.add(new JScrollPane(orderList), BorderLayout.CENTER);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-        panel.add(new JScrollPane(orderDetailsTextArea), BorderLayout.EAST);
+        mainPanel.add(listsPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(new JScrollPane(orderDetailsTextArea), BorderLayout.EAST);
 
         // Ajouter le panneau à la fenêtre
-        add(panel);
+        add(mainPanel);
 
         // Rafraîchir les commandes lors du lancement
         refreshOrders();
+        refreshDeliveredOrders();
+    }
+
+    private void showOrderDelivered() {
+        int selectedIndex = secondList.getSelectedIndex();
+        if (selectedIndex != -1) {
+            Order selectedOrder = ordersDelivered.get(selectedIndex);
+            orderDetailsTextArea.setText(selectedOrder.toStringDelivered());
+        } else {
+            orderDetailsTextArea.setText("");
+        }
+    }
+
+    public void refreshDeliveredOrders() {
+        ordersDelivered = database.getDeliveredOrders();
+        secondListModel.clear();
+        for (Order order : ordersDelivered) {
+            secondListModel.addElement("Commande " + order.getId() + " - " + database.getPizzaNameFromOrder(order) + " - " + database.getTailleFromOrder(order));
+        }
     }
 
     private void showOrderDetails() {
         int selectedIndex = orderList.getSelectedIndex();
         if (selectedIndex != -1) {
-            Order selectedOrder = orders.get(selectedIndex);
-            orderDetailsTextArea.setText(selectedOrder.toString());
+            Order selectedOrder = ordersNotDelivered.get(selectedIndex);
+            orderDetailsTextArea.setText(selectedOrder.toStringNotDelivered());
         } else {
             orderDetailsTextArea.setText("");
         }
     }
 
     public void refreshOrders() {
-        orders = database.getOrders();
+        ordersNotDelivered = database.getOrders();
         orderListModel.clear();
-        for (Order order : orders) {
+        for (Order order : ordersNotDelivered) {
             orderListModel.addElement("Commande " + order.getId() + " - " + database.getPizzaNameFromOrder(order) + " - " + database.getTailleFromOrder(order));
         }
     }
