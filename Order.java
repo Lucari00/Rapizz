@@ -13,35 +13,36 @@ public class Order {
      * Prix de la commande
      */
     private float price;
-    /**
-     * Date de la commande
-     */
-    private String date;
-    /**
-     * Identifiant du livreur
-     */
     private int delivererId;
     /**
      * Identifiant du client
      */
     private int clientId;
+    /**
+     * Date de la commande
+     */
     private Timestamp dateOrdered;
+    /**
+     * Date de livraison de la commande
+     */
     private Timestamp dateDelivered;
 
     /**
      * Constructeur de la classe Order
-     * @param id identifiant de la commande
-     * @param price prix de la commande
-     * @param date date de la commande
-     * @param delivererId identifiant du livreur
-     * @param clientId identifiant du client
+     * @param idCommande l'identifiant de la commande
+     * @param prixCommande le prix de la commande
+     * @param dateCommande la date de la commande
+     * @param dateLivree la date de livraison de la commande
+     * @param idLivreur l'identifiant du livreur
+     * @param idClient l'identifiant du client
      */
-    public Order(int id, float price, String date, int delivererId, int clientId) {
-        this.id = id;
-        this.price = price;
-        this.date = date;
-        this.delivererId = delivererId;
-        this.clientId = clientId;
+    public Order(int idCommande, float prixCommande, Timestamp dateCommande, Timestamp dateLivree, int idLivreur, int idClient) {
+        this.id = idCommande;
+        this.price = prixCommande;
+        this.dateOrdered = dateCommande;
+        this.dateDelivered = dateLivree;
+        this.delivererId = idLivreur;
+        this.clientId = idClient;
     }
 
     /**
@@ -60,18 +61,6 @@ public class Order {
         return price;
     }
 
-    /**
-     * Getter de la date de la commande
-     * @return la date de la commande
-     */
-    public String getDate() {
-        return date;
-    }
-
-    /**
-     * Getter de l'identifiant du livreur
-     * @return l'identifiant du livreur
-     */
     public int getDelivererId() {
         return delivererId;
     }
@@ -86,7 +75,7 @@ public class Order {
 
     /**
      * Fonction pour l'affichage d'une commande en cours de livraison
-     * @return l'affichage de la commande
+     * @return l'affichage de la commande'
      */
     public String toStringNotDelivered() {
         return "Order{\n" +
