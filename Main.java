@@ -1,25 +1,25 @@
-import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 
+/**
+ * Classe principale pour l'application Rapizz.
+ */
 public class Main {
+    /**
+     * Méthode principale de l'application Rapizz.
+     * Elle initialise la base de données et lance l'interface utilisateur principale de la pizzeria.
+     * 
+     * @param args les arguments de la ligne de commande
+     * @throws SQLException si une erreur de base de données survient
+     * @throws FileNotFoundException si un fichier nécessaire n'est pas trouvé
+     * @throws IOException si une erreur d'entrée/sortie survient
+     */
     public static void main(String[] args) throws SQLException, FileNotFoundException, IOException {
-         // Create a new database connection
-         
-         Database database = new Database("Palaysi", "Luca", "null", 100);
+        
+        Database database = new Database();
 
-         // create main Upizzeria UI
-         MainPizzeriaUI mainPizzeriaUI = new MainPizzeriaUI(database);
+        new MainPizzeriaUI(database);
          
    }
 }

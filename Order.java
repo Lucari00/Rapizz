@@ -2,7 +2,6 @@ public class Order {
     private int id;
     private float price;
     private String date;
-    private boolean isFree;
     private int delivererId;
     private int clientId;
 
@@ -10,7 +9,6 @@ public class Order {
         this.id = id;
         this.price = price;
         this.date = date;
-        this.isFree = isFree;
         this.delivererId = delivererId;
         this.clientId = clientId;
     }

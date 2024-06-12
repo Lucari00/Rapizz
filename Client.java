@@ -4,7 +4,6 @@ public class Client {
     private String prenomClient;
     private String adresseClient;
     private float solde;
-    private int nombreCommandes;
 
     // Constructeur
     public Client(int idClient, String nomClient, String prenomClient, String adresseClient, float solde) {

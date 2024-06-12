@@ -15,14 +15,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Classe qui gère l'accès à la base de données de l'application Rapizz.
+ */
 public class Database {
+    /**
+     * URL de connexion à la base de données.
+     */
     private final String urlString = "jdbc:mysql://localhost:3306/Rapizz";
+    /**
+     * Nom d'utilisateur pour la connexion à la base de données.
+     */
     private String usernameString;
+    /**
+     * Mot de passe pour la connexion à la base de données.
+     */
     private String passwordString;
+    /**
+     * Objet Connection pour la connexion à la base de données.
+     */
     private Connection connection;
+    /**
+     * Client actuellement connecté à l'application.
+     */
     private Client client;
 
-    public Database(String nomClient, String prenomClient, String adresseClient, float solde) {
+    /**
+     * Constructeur par défaut de la classe Database.
+     * Charge les informations de connexion à la base de données depuis un fichier de configuration et initialise la connexion.
+     */
+    public Database() {
         Properties props = new Properties();
         File configFile = new File("config.properties");
 
@@ -49,14 +71,21 @@ public class Database {
         }
         
         connection = getConnection();
-        CreateTable();
-        // this.client = CreateClient(nomClient, prenomClient, adresseClient, solde);
+        createTables();
     }
 
+    /**
+     * Setter du client actuellement connecté à l'application.
+     * @param client un objet Client représentant le client actuellement connecté
+     */
     public void setClient(Client client) {
         this.client = client;
     }
 
+    /**
+     * Getter de la connexion à la base de données.
+     * @return l'ojet Connection représentant la connexion à la base de données
+     */
     public Connection getConnection() {
         if (connection != null) {
             return connection;
@@ -69,7 +98,11 @@ public class Database {
         return connection;
     }
 
-    private void CreateTable() {
+    /**
+     * Procédure qui crée les tables de la base de données en exécutant le script createTables.sql.
+     * Utilise la classe ScriptRunner pour exécuter le script.
+     */
+    private void createTables() {
         ScriptRunner runner = new ScriptRunner(connection, true, true);
         try {
             runner.runScript(new BufferedReader(new FileReader("SQLScripts/createTables.sql")));
@@ -78,7 +111,11 @@ public class Database {
         }
     }
 
-    private void DeleteDatabseTables() {
+    /**
+     * Procédure qui supprime les tables de la base de données en exécutant le script dropTables.sql.
+     * Utilise la classe ScriptRunner pour exécuter le script.
+     */
+    private void deleteTables() {
         ScriptRunner runner = new ScriptRunner(connection, true, true);
         try {
             runner.runScript(new BufferedReader(new FileReader("SQLScripts/dropTables.sql")));
@@ -87,12 +124,19 @@ public class Database {
         }
     }
 
+    /**
+     * Procédure qui réinitialise la base de données en supprimant les tables et en les recréant.
+     */
     public void resetDatabase() {
-        DeleteDatabseTables();
-        CreateTable();
+        deleteTables();
+        createTables();
         System.out.println("Database reset");
     }
 
+    /**
+     * Fonction qui récupère la liste des pizzas disponibles dans la base de données.
+     * @return une liste d'objets Pizza représentant les pizzas disponibles
+     */
     public List<Pizza> getPizzas() {
         List<Pizza> pizzaList = new ArrayList<>();
         try {
@@ -118,6 +162,10 @@ public class Database {
         return pizzaList;
     }
 
+    /**
+     * Fonction qui récupère la liste des tailles de pizza disponibles dans la base de données.
+     * @return une liste d'objets Taille représentant les tailles de pizza disponibles
+     */
     public List<Taille> getTailles() {
         List<Taille> tailles = new ArrayList<>();
         try {
@@ -133,8 +181,11 @@ public class Database {
         return tailles;
     }
 
+    /**
+     * Fonction qui récupère la liste des livreurs affectés à aucune commande dans la base de données.
+     * @return une liste d'objets Livreur représentant les livreurs libres
+     */
     private List<Livreur> getFreeLivreur() {
-        // Requête SQL pour trouver les livreurs libres
         String query = "SELECT idLivreur, nomLivreur, prenomLivreur " +
                         "FROM Livreurs " +
                         "WHERE idLivreur NOT IN (SELECT idLivreur FROM Commandes WHERE dateLivree IS NULL)";
@@ -171,6 +222,10 @@ public class Database {
         return livreursLibres;
     }
 
+    /**
+     * Procédure qui rafraîchit le solde du client passé en paramètre par une requête à la base de données.
+     * @param client un objet Client dont le solde doit être rafraîchi
+     */
     public void refreshClientSolde(Client client) {
         try {
             String query = "SELECT solde FROM Clients WHERE idClient = ?";
@@ -185,6 +240,10 @@ public class Database {
         }
     }
 
+    /**
+     * Procédure qui met à jour le solde du client actuellement connecté dans la base de données.
+     * @param newSolde le réel du nouveau solde du client
+     */
     public void updateClientSolde(float newSolde) {
         try {
             newSolde = Math.round(newSolde * 100) / 100.0f;
@@ -205,6 +264,11 @@ public class Database {
         }
     }
 
+    /**
+     * Fonction qui récupère le nombre de commandes passées par un client donné.
+     * @param client un objet Client dont on veut connaître le nombre de commandes
+     * @return le nombre de commandes passées par le client
+     */
     public int getNombreCommandesByClient(Client client) {
         int nombreCommandes = 0;
         try {
@@ -222,6 +286,15 @@ public class Database {
         return nombreCommandes;
     }
 
+    /**
+     * Fonction qui ajoute une commande à la base de données.
+     * Gère si un livreur est disponible, si le client a les fonds nécessaires et si le client a droit à une pizza gratuite.
+     * Appelle la modification du solde du client si la commande est ajoutée avec succès.
+     * @param selectedPizzaString le nom de la pizza sélectionnée
+     * @param selectedSizeString le nom de la taille sélectionnée
+     * @param price le prix de la commande
+     * @return un message indiquant le succès ou l'échec de l'ajout de la commande
+     */
     public String addOrder(String selectedPizzaString, String selectedSizeString, float price) {
         try {
             List<Pizza> pizzaList = getPizzas();
@@ -255,7 +328,7 @@ public class Database {
                 return "noFunds";
             }
 
-            // check if the user has 10 orders and the next one is free
+            // Vérifier si le client a droit à une pizza gratuite tous les 10 commandes
             int nombreCommandes = getNombreCommandesByClient(client);
             if (nombreCommandes % 10 == 0 && nombreCommandes != 0) {
                 price = 0;
@@ -270,7 +343,6 @@ public class Database {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
 
-                // get id from last inserted order
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT MAX(idCommande) FROM Commandes");
                 int idCommande = -1;
@@ -278,7 +350,6 @@ public class Database {
                     idCommande = resultSet.getInt(1);
                 }
 
-                // insert into PizzaCommande
                 addPizzaCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommande);
 
                 updateClientSolde(client.getSolde() - price);
@@ -299,6 +370,10 @@ public class Database {
         }
     }
 
+    /**
+     * Fonction qui récupère la liste des pizzas les plus et les moins commandées dans la base de données.
+     * @return le texte à afficher pour les pizzas les plus et les moins commandées
+     */
     public List<String> getMostAndLeastOrderedPizzas() {
         List<String> result = new ArrayList<>();
         String mostOrderedQuery = "SELECT p.nomPizza, COUNT(pc.idPizza) AS order_count " +
@@ -329,12 +404,16 @@ public class Database {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            // Gérer l'erreur de manière appropriée
         }
 
         return result;
     }
 
+    /**
+     * Fonction qui récupère la liste des ingrédients de la pizza passée en paramètre.
+     * @param pizza un objet Pizza dont on veut connaître les ingrédients
+     * @return la liste des ingrédients de la pizza
+     */
     public List<String> getIngredients(Pizza pizza) {
         List<String> ingredients = new ArrayList<>();
         String query = "SELECT i.nomIngredient " +
@@ -343,7 +422,7 @@ public class Database {
                        "WHERE ip.idPizza = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, pizza.getId()); // Supposons que Pizza a une méthode getId() pour obtenir son identifiant
+            statement.setString(1, pizza.getId());
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -351,13 +430,17 @@ public class Database {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            // Gérer l'erreur de manière appropriée
         }
 
         return ingredients;
     }
 
-
+    /**
+     * Fonction qui marque une commande comme livrée dans la base de données.
+     * Utilise la procédure stockée update_commande_livree.
+     * @param idCommande l'identifiant de la commande à marquer comme livrée
+     * @return true si la commande a été marquée comme livrée avec succès, false sinon
+     */
     public boolean markAsDelivered(int idCommande) {
         try {
             String updateCommandeLivree = "CALL update_commande_livree(?)";
@@ -378,6 +461,10 @@ public class Database {
         }
     }
 
+    /**
+     * Fonction qui récupère la liste des clients de la base de données.
+     * @return une liste d'objets Client représentant les clients de la base de données
+     */
     public List<Client> getClients() {
         List<Client> clientList = new ArrayList<>();
         try {
@@ -405,7 +492,15 @@ public class Database {
         return clientList;
     }
 
-    public Client CreateClient(String nomClient, String prenomClient, String adresseClient, float solde) {
+    /**
+     * Fonction qui crée un client dans la base de données.
+     * @param nomClient le nom du client
+     * @param prenomClient le prénom du client
+     * @param adresseClient l'adresse du client
+     * @param solde le solde du client
+     * @return un objet Client représentant le client créé
+     */
+    public Client createClient(String nomClient, String prenomClient, String adresseClient, float solde) {
         int idClient = -1;
         try {
             String sql = "INSERT INTO Clients (nomClient, prenomClient, adresseClient, solde) VALUES (?, ?, ?, ?)";
@@ -436,6 +531,12 @@ public class Database {
         return client;
     }
 
+    /**
+     * Procédure qui lie une pizza à une commande et à une taille dans la table PizzaCommande.
+     * @param idPizza l'identifiant de la pizza
+     * @param nomTaille le nom de la taille de la pizza
+     * @param idCommande l'identifiant de la commande
+     */
     public void addPizzaCommande(int idPizza, String nomTaille, int idCommande) {
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO PizzaCommande (idPizza, nomTaille, idCommande) VALUES (?, ?, ?)");
@@ -454,10 +555,14 @@ public class Database {
         }
     }
 
-
-    public void addLivreur(String string, String string2) {
+    /**
+     * Procédure qui ajoute un livreur à la base de données.
+     * Ajoute un véhicule pour le livreur.
+     * @param nomLivreur le nom du livreur
+     * @param prenomLivreur le prénom du livreur
+     */
+    public void addLivreur(String nomLivreur, String prenomLivreur) {
         try {
-            // il faut ajouter un véhicule pour le livreur
             String sqlVehicle = "INSERT INTO Vehicules (Marque, nomVehicule, immatriculation, typeVehicule) VALUES (?, ?, ?, ?)";
             PreparedStatement pstmtVehicle = connection.prepareStatement(sqlVehicle, Statement.RETURN_GENERATED_KEYS);
             pstmtVehicle.setString(1, "Renault");
@@ -469,7 +574,6 @@ public class Database {
             int affectedRowsVehicle = pstmtVehicle.executeUpdate();
             if (affectedRowsVehicle > 0) {
                 System.out.println("Véhicule ajouté avec succès.");
-                // il faut que je récupère l'id du véhicule ajouté
                 ResultSet generatedKeys = pstmtVehicle.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     vehicleId = generatedKeys.getInt(1);
@@ -480,8 +584,8 @@ public class Database {
 
             String sql = "INSERT INTO Livreurs (nomLivreur, prenomLivreur, idVehicule) VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(sql);
-            pstmt.setString(1, string);
-            pstmt.setString(2, string2);
+            pstmt.setString(1, nomLivreur);
+            pstmt.setString(2, prenomLivreur);
             pstmt.setInt(3, vehicleId);
 
             int affectedRows = pstmt.executeUpdate();
@@ -495,8 +599,11 @@ public class Database {
         }
     }
 
+    /**
+     * Procédure qui insère les données dans la base de données en exécutant le script insertTables.sql.
+     * Utilise la classe ScriptRunner pour exécuter le script.
+     */
     public void insertData() {
-        // execute the SQL script insertTables.sql
         ScriptRunner runner = new ScriptRunner(connection, true, true);
         try {
             runner.runScript(new BufferedReader(new FileReader("SQLScripts/insertTables.sql")));
@@ -506,10 +613,18 @@ public class Database {
         }
     }
 
+    /**
+     * Getter du client actuellement connecté à l'application.
+     * @return un objet Client représentant le client actuellement connecté
+     */
     public Client getClient() {
         return this.client;
     }
 
+    /**
+     * Fonction qui récupère la liste des commandes non livrées dans la base de données.
+     * @return une liste d'objets Order représentant les commandes non livrées
+     */
     public List<Order> getOrders() {
         List<Order> orders = new ArrayList<>();
         try {
@@ -530,6 +645,11 @@ public class Database {
         return orders;
     }
 
+    /**
+     * Fonction qui récupère le nom de la pizza d'une commande passée en paramètre.
+     * @param order un objet Order dont on veut connaître le nom de la pizza
+     * @return le nom de la pizza de la commande
+     */
     public String getPizzaNameFromOrder(Order order) {
         String pizzaName = "";
         try {
@@ -545,6 +665,11 @@ public class Database {
         return pizzaName;
     }
 
+    /**
+     * Fonction qui récupère la taille de la pizza d'une commande passée en paramètre.
+     * @param order un objet Order dont on veut connaître la taille de la pizza
+     * @return le nom de la taille de la pizza de la commande
+     */
     public String getTailleFromOrder(Order order) {
         String taille = "";
         try {
@@ -560,6 +685,10 @@ public class Database {
         return taille;
     }
 
+    /**
+     * Fonction qui récupère la liste des livreurs de la base de données.
+     * @return une liste d'objets Livreur représentant les livreurs de la pizzeria
+     */
     public List<Livreur> getLivreurs() {
         List<Livreur> livreurs = new ArrayList<>();
         try {
@@ -575,6 +704,11 @@ public class Database {
         return livreurs;
     }
 
+    /**
+     * Fonction qui récupère la commande associée à un livreur passé en paramètre.
+     * @param Livreur un objet Livreur dont on veut connaître la commande associée
+     * @return un objet Order représentant la commande associée au livreur, null si le livreur n'a pas de commande
+     */
     public Order getOrderByLivreur(Livreur Livreur) {
         Order order = null;
         try {
@@ -590,6 +724,11 @@ public class Database {
         return order;
     }
 
+    /**
+     * Fonction qui récupère l'adresse d'un client passé en paramètre.
+     * @param clientId l'identifiant du client dont on veut connaître l'adresse
+     * @return une chaîne de caractères représentant l'adresse du client
+     */
     public String getAdressById(int clientId) {
         String adresse = "";
         try {
@@ -605,6 +744,10 @@ public class Database {
         return adresse;
     }
 
+    /**
+     * Fonction qui récupère la liste des 5 clients ayant dépensé le plus dans la pizzeria.
+     * @return la liste des affichages des 5 clients ayant dépensé le plus
+     */
     public List<String> getTopClients() {
         List<String> topClients = new ArrayList<>();
         String query = "SELECT c.nomClient, c.prenomClient, SUM(co.prixCommande) AS montantTotal " +
@@ -629,6 +772,10 @@ public class Database {
         return topClients;
     }
 
+    /**
+     * Fonction qui récupère l'ingrédient le plus populaire parmi les clients de la pizzeria.
+     * @return le nom de l'ingrédient le plus commandé
+     */
     public String getFavoriteIngredient() {
         String favoriteIngredient = "";
         String query = "SELECT i.nomIngredient, COUNT(ip.idIngredient) AS ingredient_count " +
@@ -650,6 +797,10 @@ public class Database {
         return favoriteIngredient;
     }
 
+    /**
+     * Fonction qui récupère le chiffre d'affaires par jour de la pizzeria.
+     * @return une map associant les dates aux chiffres d'affaires correspondants
+     */
     public Map<String, Float> getRevenueByDay() {
         String query = "SELECT DATE(dateCommande) AS date, SUM(prixCommande) AS revenue FROM Commandes GROUP BY DATE(dateCommande)";
         Map<String, Float> dailyRevenues = new HashMap<>();
@@ -669,6 +820,10 @@ public class Database {
         return dailyRevenues;
     }
 
+    /**
+     * Fonction qui récupère le livreur ayant le plus de retards dans la livraison des commandes.
+     * @return le message à afficher pour le livreur ayant le plus de retards avec son véhicule et le nombre de retards
+     */
     public String getWorstDeliveryPerson() {
         String query = 
             "SELECT L.nomLivreur, L.prenomLivreur, V.Marque, V.nomVehicule, COUNT(*) AS retardCount " +
@@ -697,6 +852,10 @@ public class Database {
         return message.toString();
     }
 
+    /**
+     * Fonction qui récupère la liste des véhicules non utilisés par les livreurs.
+     * @return l'affichage des véhicules non utilisés avec leur marque et leur nom
+     */
     public List<String> getUnusedVehicles() {
         String query = 
             "SELECT V.Marque, V.nomVehicule " +
@@ -721,6 +880,10 @@ public class Database {
         return unusedVehicles;
     }
 
+    /**
+     * Fonction qui récupère le nombre de commandes passées par chaque client.
+     * @return une map associant les noms + prénoms des clients au nombre de commandes passées
+     */
     public Map<String, Integer> getNumberOfOrdersPerClient() {
         String query = 
             "SELECT C.nomClient, C.prenomClient, COUNT(*) AS orderCount " +
@@ -745,6 +908,10 @@ public class Database {
         return ordersPerClient;
     }
 
+    /**
+     * Fonction qui récupère le nombre moyen de commandes passées par les clients.
+     * @return le réel du nombre moyen de commandes passées par les clients
+     */
     public double getAverageNumberOfOrders() {
         String query = 
             "SELECT AVG(orderCount) AS averageOrders " +
@@ -767,6 +934,10 @@ public class Database {
         return averageOrders;
     }
     
+    /**
+     * Retourne la liste des noms des clients ayant passé plus de commandes que la moyenne.
+     * @return la liste des noms + prénoms des clients ayant passé plus de commandes que la moyenne
+     */
     public List<String> getClientsWithMoreThanAverageOrders() {
         double averageOrders = getAverageNumberOfOrders();
         String query = 
@@ -792,6 +963,4 @@ public class Database {
     
         return clients;
     }
-    
-    
 }

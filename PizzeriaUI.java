@@ -164,9 +164,6 @@ public class PizzeriaUI extends JFrame {
         gbc.gridy = 6;
         gbc.gridwidth = 2;
         gbc.gridheight = 1;
-        JScrollPane scrollPane = new JScrollPane(orderSummaryTextArea);
-        //scrollPane.setVerticalScrollBarPolicy(JScrollPane); // Définir la politique d'ajustement
-        //panel.add(scrollPane, gbc);
 
         // Ajouter le panneau à la fenêtre
         add(panel);
@@ -315,8 +312,6 @@ public class PizzeriaUI extends JFrame {
         // ajouter dans la base de donnée la commande
         String orderString = database.addOrder(selectedPizza, selectedTaille, finalPrice);
 
-        // Créer un StringBuilder pour construire le résumé de la commande
-        StringBuilder orderSummary = new StringBuilder();
         switch (orderString) {
             case "noFunds":
                 JOptionPane.showMessageDialog(mainPizzeriaUI, "Erreur avec la commande pas assez de fonds.", "Erreur", JOptionPane.ERROR_MESSAGE);
