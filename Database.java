@@ -968,7 +968,7 @@ public class Database {
             "LEFT JOIN Commandes Co ON C.idClient = Co.idClient " +
             "GROUP BY C.nomClient, C.prenomClient " +
             "HAVING COUNT(Co.idCommande) > (SELECT AVG(commandCount) FROM " +
-            "(SELECT COUNT(idCommande) AS commandCount FROM Clients C" +
+            "(SELECT COUNT(idCommande) AS commandCount FROM Clients C " +
             "LEFT JOIN Commandes Co ON C.idClient = Co.idClient GROUP BY C.idClient) AS T)";
         
             List<String> clientsOverAverage = new ArrayList<>();
