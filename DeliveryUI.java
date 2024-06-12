@@ -4,12 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+/**
+ * Partie de l'interface graphique pour les informations des livreurs
+ */
 public class DeliveryUI extends JFrame {
     private DefaultListModel<String> orderListModel;
     private JList<String> orderList;
     private Order order;
     private JComboBox<String> deliveryComboBox;
-    List<Livreur> livreurs;
+    private List<Livreur> livreurs;
 
     private boolean isRefreshing = false;
 
@@ -18,6 +21,12 @@ public class DeliveryUI extends JFrame {
     private PizzeriaManagerUI commandManagerUI;
     private PizzeriaUI pizzeriaUI;
 
+    /**
+     * Constructeur de la classe DeliveryUI
+     * @param database la classe de gestion de la base de données
+     * @param mainPizzeriaUI la classe de l'interface principale de la pizzeria
+     * @param commandManagerUI la classe de l'interface de gestion des commandes
+     */
     public DeliveryUI(Database database, MainPizzeriaUI mainPizzeriaUI, PizzeriaManagerUI commandManagerUI) {
         this.database = database;
         this.mainPizzeriaUI = mainPizzeriaUI;
@@ -72,7 +81,7 @@ public class DeliveryUI extends JFrame {
                 if (!isRefreshing) {
                     JComboBox cb = (JComboBox)e.getSource();
                     Livreur livreur = livreurs.get(cb.getSelectedIndex());
-                    ChangeLivreur(livreur);
+                    changeLivreur(livreur);
                 }
             }
         });
@@ -84,11 +93,19 @@ public class DeliveryUI extends JFrame {
         add(panel);
     }
 
+    /**
+     * Setter de l'interface principale de la pizzeria
+     * @param pizzeriaUI l'interface principale de la pizzeria
+     */
     public void setPizzeriaUI(PizzeriaUI pizzeriaUI) {
         this.pizzeriaUI = pizzeriaUI;
     }
 
-    public void ChangeLivreur(Livreur livreur) {
+    /**
+     * Procédure qui rafraîchit les commandes pour le livreur passé en paramètre
+     * @param livreur le livreur sélectionné
+     */
+    public void changeLivreur(Livreur livreur) {
         order = database.getOrderByLivreur(livreur);
         orderListModel.clear();
         if (order != null) {
@@ -96,16 +113,22 @@ public class DeliveryUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure qui rafraîchit les commandes pour le livreur sélectionné
+     */
     public void refreshOrders() {
         if (deliveryComboBox.getSelectedIndex() == -1) {
             return;
         }
         Livreur livreur = livreurs.get(deliveryComboBox.getSelectedIndex());
         if (livreur != null) {
-            ChangeLivreur(livreur);
+            changeLivreur(livreur);
         }
     }
 
+    /**
+     * Procédure qui rafraîchit la liste des livreurs
+     */
     public void refreshLivreurs() {
         deliveryComboBox.removeAllItems();
         livreurs = database.getLivreurs();
@@ -114,13 +137,20 @@ public class DeliveryUI extends JFrame {
         }
     }
 
-    public void Refresh() {
+    /**
+     * Procédure qui rafraîchit les données de l'interface livreur
+     */
+    public void refresh() {
         isRefreshing = true;
         refreshOrders();
         refreshLivreurs();
         isRefreshing = false;
     }
 
+    /**
+     * Procédure qui marque la commande comme livrée
+     * Appelle la méthode markAsDelivered de la classe Database quand le bouton est cliqué
+     */
     private void markAsDelivered() {
         if (orderList.getModel().getSize() > 0) {
             orderListModel.remove(0);
@@ -130,16 +160,5 @@ public class DeliveryUI extends JFrame {
         } else {
             JOptionPane.showMessageDialog(mainPizzeriaUI, "Il n'y a pas de commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-        // int selectedIndex = orderList.getSelectedIndex();
-        // System.out.println("selected : " + selectedIndex);
-        // if (selectedIndex != -1) {
-        //     //String deliveredOrder = orders.remove(selectedIndex);
-        //     orderListModel.remove(selectedIndex);
-        //     database.markAsDelivered(order.getId());
-        //     //JOptionPane.showMessageDialog(this, deliveredOrder + " a été marqué comme livré.", "Commande Livrée", JOptionPane.INFORMATION_MESSAGE);
-        // } else {
-        //     JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez sélectionner une commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);
-        // }
     }
-
 }

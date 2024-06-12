@@ -50,7 +50,7 @@ public class MainPizzeriaUI extends JFrame {
             database.resetDatabase();
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
-            deliveryUI.Refresh();
+            deliveryUI.refresh();
         });
         panel.add(button);
 
@@ -92,7 +92,7 @@ public class MainPizzeriaUI extends JFrame {
                     lastNames.get((int) (Math.random() * lastNames.size())));
             
             //database.addLivreur("Luca", "Palaysi");
-            deliveryUI.Refresh();
+            deliveryUI.refresh();
         });
         panel.add(buttonAddLivreur);
 
@@ -101,7 +101,7 @@ public class MainPizzeriaUI extends JFrame {
             database.insertData();
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
-            deliveryUI.Refresh();
+            deliveryUI.refresh();
         });
         panel.add(buttonInsertData);
 
