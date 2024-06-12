@@ -4,11 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Classe de l'interface principale de la pizzeria qui contient les interfaces de gestion des commandes, des livreurs et du gérant
+ */
 public class MainPizzeriaUI extends JFrame {
     private PizzeriaManagerUI commandManagerUI;
     private PizzeriaUI pizzeriaUI;
     private DeliveryUI deliveryUI;
 
+    /**
+     * Constructeur de la classe MainPizzeriaUI
+     * @param database la classe de gestion de la base de données
+     */
     public MainPizzeriaUI(Database database) {
         // Configurer la fenêtre principale
         setTitle("Pizzeria - Interface Principale");
@@ -35,7 +42,12 @@ public class MainPizzeriaUI extends JFrame {
         setVisible(true);
     }
 
-    // Méthode utilitaire pour encapsuler un composant dans un JPanel avec un titre
+    /**
+     * Fonction pour créer un panneau avec un composant et un titre dans la grille
+     * @param component le composant à ajouter
+     * @param title le titre du panneau
+     * @return le panneau avec le composant et le titre
+     */
     private JPanel createPanelWithComponent(Container component, String title) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(component, BorderLayout.CENTER);
@@ -43,8 +55,15 @@ public class MainPizzeriaUI extends JFrame {
         return panel;
     }
 
+    /**
+     * Fonction pour créer un panneau avec les boutons pour les actions sur la base de données
+     * @param database la classe de gestion de la base de données
+     * @return le panneau avec les boutons
+     */
     private JPanel createButtonsPanel(Database database) {
         JPanel panel = new JPanel(new FlowLayout());
+
+        // Bouton pour réinitialiser la base de données
         JButton button = new JButton("Reset Database");
         button.addActionListener(e -> {
             database.resetDatabase();
@@ -53,10 +72,10 @@ public class MainPizzeriaUI extends JFrame {
             deliveryUI.refresh();
         });
         panel.add(button);
-
+        
+        // Bouton pour ajouter un livreur avec un nom aléatoire
         JButton buttonAddLivreur = new JButton("Add Livreur");
         buttonAddLivreur.addActionListener(e -> {
-            // liste de nom de famille aléatoire
             List<String> lastNames = new ArrayList<>();
             lastNames.add("Palaysi");
             lastNames.add("Philippe");
@@ -69,8 +88,6 @@ public class MainPizzeriaUI extends JFrame {
             lastNames.add("Martin");
             lastNames.add("Bernard");
 
-
-            // liste de prénom aléatoire
             List<String> firstNames = new ArrayList<>();
             firstNames.add("Luca");
             firstNames.add("Jean");
@@ -87,15 +104,14 @@ public class MainPizzeriaUI extends JFrame {
             firstNames.add("Alexandra");
             firstNames.add("Alexis");
 
-            // ajouter un livreur avec un nom et un prénom aléatoire
             database.addLivreur(firstNames.get((int) (Math.random() * firstNames.size())),
                     lastNames.get((int) (Math.random() * lastNames.size())));
             
-            //database.addLivreur("Luca", "Palaysi");
             deliveryUI.refresh();
         });
         panel.add(buttonAddLivreur);
 
+        // Bouton pour insérer les données de départ dans la base de données
         JButton buttonInsertData = new JButton("Insert Data");
         buttonInsertData.addActionListener(e -> {
             database.insertData();
@@ -105,6 +121,7 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonInsertData);
 
+        // Bouton pour afficher les meilleurs clients
         JButton buttonTopClients = new JButton("Meilleurs Clients");
         buttonTopClients.addActionListener(e -> {
             List<String> topClients = database.getTopClients();
@@ -116,7 +133,7 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonTopClients);
 
-        // Ajouter le bouton pour afficher la pizza la plus et la moins demandée
+        // Bouton pour afficher les pizzas les plus/moins demandées
         JButton buttonPizzaDemand = new JButton("Pizza la plus/moins demandée");
         buttonPizzaDemand.addActionListener(e -> {
             List<String> pizzaDemand = database.getMostAndLeastOrderedPizzas();
@@ -128,6 +145,7 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonPizzaDemand);
 
+        // Bouton pour afficher l'ingrédient favori
         JButton buttonFavoriteIngredient = new JButton("Ingrédient Favori");
         buttonFavoriteIngredient.addActionListener(e -> {
             String favoriteIngredient = database.getFavoriteIngredient();
@@ -136,19 +154,21 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonFavoriteIngredient);
 
-        JButton buttonRevenueFigure = new JButton("Chiffre d'affaire");
-        buttonRevenueFigure.addActionListener(e -> {
+        // Bouton pour afficher l'évolution du chiffre d'affaires par jour
+        JButton buttonRevenueEvolution = new JButton("Chiffre d'affaires");
+        buttonRevenueEvolution.addActionListener(e -> {
             Map<String, Float> revenuesByDay = database.getRevenueByDay();
             
-            StringBuilder message = new StringBuilder("Chiffre d'affaire par jour:\n");
+            StringBuilder message = new StringBuilder("Chiffre d'affaires par jour:\n");
             for (Map.Entry<String, Float> entry : revenuesByDay.entrySet()) {
                 message.append(entry.getKey()).append(": ").append(entry.getValue()).append("€\n");
             }
 
-            JOptionPane.showMessageDialog(this, message, "Chiffre d'affaire", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, message, "Chiffre d'affaires", JOptionPane.INFORMATION_MESSAGE);
         });
-        panel.add(buttonRevenueFigure);
+        panel.add(buttonRevenueEvolution);
 
+        // Bouton pour afficher le livreur ayant le plus de retards
         JButton buttonWorstDelevery = new JButton("Pire Livreur");
         buttonWorstDelevery.addActionListener(e -> {
             String worstDelivery = database.getWorstDeliveryPerson();
@@ -159,7 +179,8 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonWorstDelevery);
 
-        JButton buttonUnusedVehicles = new JButton("Véhicles non utilisés");
+        // Bouton pour afficher les véhicules non utilisés
+        JButton buttonUnusedVehicles = new JButton("Véhicules non utilisés");
         buttonUnusedVehicles.addActionListener(e -> {
             List<String> unusedVehicles = database.getUnusedVehicles();
             StringBuilder message = new StringBuilder();
@@ -171,10 +192,11 @@ public class MainPizzeriaUI extends JFrame {
             } else {
                message.append("Tous les véhicules ont été utilisés.");
             }
-            JOptionPane.showMessageDialog(this, message.toString(), "Véhicles non utilisés", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, message.toString(), "Véhicules non utilisés", JOptionPane.INFORMATION_MESSAGE);
         });
         panel.add(buttonUnusedVehicles);
 
+        // Bouton pour afficher le nombre de commandes par client
         JButton buttonOrdersPerClient = new JButton("Nombre de commandes par client");
         buttonOrdersPerClient.addActionListener(e -> {
             Map<String, Integer> ordersPerClient = database.getNumberOfOrdersPerClient();
@@ -191,17 +213,19 @@ public class MainPizzeriaUI extends JFrame {
         });
         panel.add(buttonOrdersPerClient);
 
-        JButton buttonAverageNumberOfCommand = new JButton("Nombre moyen de commandes par jour");
-        buttonAverageNumberOfCommand.addActionListener(e -> {
-            double averageNumberOfCommand = database.getAverageNumberOfOrders();
-            String message = "Le nombre moyen de commandes par jour est de : " + averageNumberOfCommand;
-            JOptionPane.showMessageDialog(this, message, "Nombre moyen de commandes par jour", JOptionPane.INFORMATION_MESSAGE);
+        // Bouton pour afficher le prix de la commande moyenne
+        JButton buttonAverageCommandPrice = new JButton("Prix de la commande moyenne");
+        buttonAverageCommandPrice.addActionListener(e -> {
+            double averageNumberOfCommand = database.getAverageOrder();
+            String message = "Le prix de la commande moyenne est de : " + averageNumberOfCommand;
+            JOptionPane.showMessageDialog(this, message, "Prix de la commande moyenne", JOptionPane.INFORMATION_MESSAGE);
         });
-        panel.add(buttonAverageNumberOfCommand);
+        panel.add(buttonAverageCommandPrice);
 
-        JButton buttonAverageRevenue = new JButton("Clients au dessus de la moyenne des commandes");
-        buttonAverageRevenue.addActionListener(e -> {
-            List<String> clientsAboveAverage = database.getClientsWithMoreThanAverageOrders();
+        // Bouton pour afficher les clients qui ont commandé plus que la moyenne
+        JButton buttonClientsOverAverage = new JButton("Clients au dessus de la moyenne des commandes");
+        buttonClientsOverAverage.addActionListener(e -> {
+            List<String> clientsAboveAverage = database.getClientsOverAverage();
             StringBuilder message = new StringBuilder();
             if (clientsAboveAverage.size() != 0) {
                 message.append("Les clients dont le nombre de commandes est supérieur à la moyenne :\n");
@@ -209,21 +233,12 @@ public class MainPizzeriaUI extends JFrame {
                     message.append(" - "+client+"\n");
                 }
             } else {
-                message.append("Aucun client n'a un chiffre d'affaire supérieur à la moyenne.");
+                message.append("Aucun client n'a un nombre de commande supérieur à la moyenne.");
             }
             JOptionPane.showMessageDialog(this, message.toString(), "Clients au dessus de la moyenne des commandes", JOptionPane.INFORMATION_MESSAGE);
         });
-        panel.add(buttonAverageRevenue);
+        panel.add(buttonClientsOverAverage);
 
         return panel;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                // new MainPizzeriaUI(new Database());
-            }
-        });
     }
 }

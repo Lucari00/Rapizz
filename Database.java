@@ -909,15 +909,13 @@ public class Database {
     }
 
     /**
-     * Fonction qui récupère le nombre moyen de commandes passées par les clients.
-     * @return le réel du nombre moyen de commandes passées par les clients
+     * Fonction qui récupère le prix de la commande moyenne.
+     * @return le réel du prix de la commande moyenne
      */
-    public double getAverageNumberOfOrders() {
+    public double getAverageOrder() {
         String query = 
-            "SELECT AVG(orderCount) AS averageOrders " +
-            "FROM (SELECT COUNT(*) AS orderCount " +
-            "      FROM Commandes " +
-            "      GROUP BY idClient) AS clientOrders";
+            "SELECT AVG(prixCommande) AS averageOrder " +
+            "FROM Commandes";
     
         double averageOrders = 0;
     
@@ -925,7 +923,7 @@ public class Database {
              ResultSet rs = stmt.executeQuery(query)) {
     
             if (rs.next()) {
-                averageOrders = rs.getDouble("averageOrders");
+                averageOrders = rs.getDouble("averageOrder");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -935,32 +933,32 @@ public class Database {
     }
     
     /**
-     * Retourne la liste des noms des clients ayant passé plus de commandes que la moyenne.
+     * Fonction qui récupère la liste des noms des clients ayant passé plus de commandes que la moyenne.
      * @return la liste des noms + prénoms des clients ayant passé plus de commandes que la moyenne
      */
-    public List<String> getClientsWithMoreThanAverageOrders() {
-        double averageOrders = getAverageNumberOfOrders();
+    public List<String> getClientsOverAverage() {
         String query = 
             "SELECT C.nomClient, C.prenomClient " +
             "FROM Clients C " +
-            "JOIN Commandes Co ON C.idClient = Co.idClient " +
+            "LEFT JOIN Commandes Co ON C.idClient = Co.idClient " +
             "GROUP BY C.nomClient, C.prenomClient " +
-            "HAVING COUNT(Co.idCommande) > ?";
-    
-        List<String> clients = new ArrayList<>();
-    
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setDouble(1, averageOrders);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    String clientName = rs.getString("nomClient") + " " + rs.getString("prenomClient");
-                    clients.add(clientName);
-                }
+            "HAVING COUNT(Co.idCommande) > (SELECT AVG(commandCount) FROM " +
+            "(SELECT COUNT(idCommande) AS commandCount FROM Clients C" +
+            "LEFT JOIN Commandes Co ON C.idClient = Co.idClient GROUP BY C.idClient) AS T)";
+        
+            List<String> clientsOverAverage = new ArrayList<>();
+        
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+        
+            while (rs.next()) {
+                String clientName = rs.getString("nomClient") + " " + rs.getString("prenomClient");
+                clientsOverAverage.add(clientName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
-        return clients;
+
+        return clientsOverAverage;
     }
 }
