@@ -1,6 +1,9 @@
 /**
  * Classe représentant une commande de pizza
  */
+import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
+
 public class Order {
     /**
      * Identifiant de la commande
@@ -22,6 +25,8 @@ public class Order {
      * Identifiant du client
      */
     private int clientId;
+    private Timestamp dateOrdered;
+    private Timestamp dateDelivered;
 
     /**
      * Constructeur de la classe Order
@@ -80,18 +85,34 @@ public class Order {
     }
 
     /**
-     * Méthode toString de la classe Order
-     * Redéfinition de la méthode toString de la classe Object pour afficher les informations de la commande
-     * @return une chaîne de caractères représentant la commande
+     * Fonction pour l'affichage d'une commande en cours de livraison
+     * @return l'affichage de la commande
      */
-    @Override
-    public String toString() {
+    public String toStringNotDelivered() {
         return "Order{\n" +
                 "   id=" + id +
                 ", \n" + "  price=" + price +
-                ", \n" + "  date='" + date + '\'' +
+                ", \n" + "  date='" + dateOrdered.toString() + '\'' +
                 ", \n" + "  delivererId=" + delivererId +
                 ", \n" + "  clientId=" + clientId +
+                ", \n" + "}";
+    }
+
+    /**
+     * Fonction pour l'affichage d'une commande livrée
+     * @return l'affichage de la commande
+     */
+    public String toStringDelivered() {
+        long minutesBetween = ChronoUnit.MINUTES.between(dateOrdered.toLocalDateTime(), dateDelivered.toLocalDateTime());
+        boolean estEnRetard = minutesBetween > 30;
+        return "Order{\n" +
+                "   id=" + id +
+                ", \n" + "  price=" + price +
+                ", \n" + "  dateOrdered=" + dateOrdered.toString() +
+                ", \n" + "  dateDelivered=" + dateDelivered.toString() +
+                ", \n" + "  delivererId=" + delivererId +
+                ", \n" + "  clientId=" + clientId +
+                ", \n" + "  estEnRetard=" + estEnRetard +
                 ", \n" + "}";
     }
 }

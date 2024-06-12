@@ -156,6 +156,7 @@ public class DeliveryUI extends JFrame {
             orderListModel.remove(0);
             database.markAsDelivered(order.getId());
             commandManagerUI.refreshOrders();
+            commandManagerUI.refreshDeliveredOrders();
             pizzeriaUI.updateUserBalance();
         } else {
             JOptionPane.showMessageDialog(mainPizzeriaUI, "Il n'y a pas de commande à marquer comme livrée.", "Erreur", JOptionPane.ERROR_MESSAGE);

@@ -70,6 +70,7 @@ public class MainPizzeriaUI extends JFrame {
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
             deliveryUI.refresh();
+            commandManagerUI.refreshDeliveredOrders();
         });
         panel.add(button);
         
@@ -118,6 +119,7 @@ public class MainPizzeriaUI extends JFrame {
             pizzeriaUI.Refresh();
             commandManagerUI.refreshOrders();
             deliveryUI.refresh();
+            commandManagerUI.refreshDeliveredOrders();
         });
         panel.add(buttonInsertData);
 

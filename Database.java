@@ -3,12 +3,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -633,11 +635,11 @@ public class Database {
             while (resultSet.next()) {
                 int id = resultSet.getInt("idCommande");
                 float price = resultSet.getFloat("prixCommande");
-                String date = resultSet.getString("dateCommande");
+                Timestamp date = resultSet.getTimestamp("dateCommande");
                 int delivererId = resultSet.getInt("idLivreur");
                 int clientId = resultSet.getInt("idClient");
 
-                orders.add(new Order(id, price, date, delivererId, clientId));
+                orders.add(new Order(id, price, date, null, delivererId, clientId));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -716,7 +718,7 @@ public class Database {
             pstmt.setInt(1, Livreur.getIdLivreur());
             ResultSet rset = pstmt.executeQuery();
             if (rset.next()) {
-                order = new Order(rset.getInt("idCommande"), rset.getFloat("prixCommande"), rset.getString("dateCommande"), rset.getInt("idLivreur"), rset.getInt("idClient"));
+                order = new Order(rset.getInt("idCommande"), rset.getFloat("prixCommande"), rset.getTimestamp("dateCommande"), null, rset.getInt("idLivreur"), rset.getInt("idClient"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -830,7 +832,7 @@ public class Database {
             "FROM Commandes C " +
             "JOIN Livreurs L ON C.idLivreur = L.idLivreur " +
             "JOIN Vehicules V ON L.idVehicule = V.idVehicule " +
-            "WHERE TIMESTAMPDIFF(MINUTE, c.dateCommande, c.dateLivree) > 30 " + 
+            "WHERE TIMESTAMPDIFF(MINUTE, c.dateCommande, c.dateLivree) > 30 " + // retard
             "GROUP BY L.nomLivreur, L.prenomLivreur, V.Marque, V.nomVehicule " +
             "ORDER BY retardCount DESC " +
             "LIMIT 1";
@@ -930,6 +932,29 @@ public class Database {
         }
     
         return averageOrders;
+    }
+
+    public List<Order> getDeliveredOrders() {
+        List<Order> deliveredOrders = new ArrayList<>();
+        String query = "SELECT * FROM Commandes WHERE dateLivree IS NOT NULL";
+
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                int idCommande = rs.getInt("idCommande");
+                BigDecimal prixCommande = rs.getBigDecimal("prixCommande");
+                Timestamp dateCommande = rs.getTimestamp("dateCommande");
+                Timestamp dateLivree = rs.getTimestamp("dateLivree");
+                int idLivreur = rs.getInt("idLivreur");
+                int idClient = rs.getInt("idClient");
+
+                Order order = new Order(idCommande, prixCommande.floatValue(), dateCommande, dateLivree, idLivreur, idClient);
+                deliveredOrders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return deliveredOrders;
     }
     
     /**
