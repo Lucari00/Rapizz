@@ -126,12 +126,6 @@ public class Client {
      */
     @Override
     public String toString() {
-        return "Client{" +
-                "idClient=" + idClient +
-                ", nomClient='" + nomClient + '\'' +
-                ", prenomClient='" + prenomClient + '\'' +
-                ", adresseClient='" + adresseClient + '\'' +
-                ", solde=" + solde +
-                '}';
+        return this.nomClient + " " + this.prenomClient;
     }
 }

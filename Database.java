@@ -292,31 +292,13 @@ public class Database {
      * Fonction qui ajoute une commande à la base de données.
      * Gère si un livreur est disponible, si le client a les fonds nécessaires et si le client a droit à une pizza gratuite.
      * Appelle la modification du solde du client si la commande est ajoutée avec succès.
-     * @param selectedPizzaString le nom de la pizza sélectionnée
-     * @param selectedSizeString le nom de la taille sélectionnée
+     * @param selectedPizza l'ojet Pizza sélectionné
+     * @param selectedSize l'objet Taille sélectionné
      * @param price le prix de la commande
      * @return un message indiquant le succès ou l'échec de l'ajout de la commande
      */
-    public String addOrder(String selectedPizzaString, String selectedSizeString, float price) {
+    public String addOrder(Pizza selectedPizza, Taille selectedSize, float price) {
         try {
-            List<Pizza> pizzaList = getPizzas();
-            Pizza selectedPizza = null;
-            for (Pizza pizza : pizzaList) {
-                if (pizza.getName().equals(selectedPizzaString)) {
-                    selectedPizza = pizza;
-                    break;
-                }
-            }
-
-            List<Taille> tailleList = getTailles();
-            Taille selectedSize = null;
-            for (Taille taille : tailleList) {
-                if (taille.getNomTaille().equals(selectedSizeString)) {
-                    selectedSize = taille;
-                    break;
-                }
-            }
-
             List<Livreur> livreurs = getFreeLivreur();
 
             if (livreurs.isEmpty()) {

@@ -25,9 +25,6 @@ public class Taille {
 
     @Override
     public String toString() {
-        return "Taille{" +
-                "nomTaille='" + nomTaille + '\'' +
-                ", prixMultiplicatif=" + prixMultiplicatif +
-                '}';
+        return this.nomTaille;
     }
 }

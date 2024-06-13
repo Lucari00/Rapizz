@@ -6,9 +6,9 @@ import java.util.List;
 
 public class PizzeriaUI extends JFrame {
 
-    private JComboBox<String> pizzaComboBox;
-    private JComboBox<String> userComboBox;
-    private JComboBox<String> sizeComboBox;
+    private JComboBox<Pizza> pizzaComboBox;
+    private JComboBox<Client> userComboBox;
+    private JComboBox<Taille> sizeComboBox;
     private JTextArea orderSummaryTextArea;
     private JLabel pizzaPriceLabel;
     private JLabel userBalanceLabel;
@@ -38,16 +38,16 @@ public class PizzeriaUI extends JFrame {
         List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
         
         // créer un tableau de chaînes pour stocker les noms des pizzas
-        String[] pizzas = new String[pizzaList.size()];
+        Pizza[] pizzas = new Pizza[pizzaList.size()];
         for (int i = 0; i < pizzaList.size(); i++) {
-            pizzas[i] = pizzaList.get(i).getName();
+            pizzas[i] = pizzaList.get(i);
         }
         pizzaComboBox = new JComboBox<>(pizzas);
 
         List<Taille> tailleList = database.getTailles(); // Get sizes from database
-        String[] tailles = new String[tailleList.size()];
+        Taille[] tailles = new Taille[tailleList.size()];
         for (int i = 0; i < tailleList.size(); i++) {
-            tailles[i] = tailleList.get(i).getNomTaille();
+            tailles[i] = tailleList.get(i);
         }
         sizeComboBox = new JComboBox<>(tailles);
 
@@ -64,9 +64,9 @@ public class PizzeriaUI extends JFrame {
         userBalanceLabel = new JLabel("Solde: ");
 
         List<Client> clientList = database.getClients(); // Get clients from database
-        String[] clients = new String[clientList.size()];
+        Client[] clients = new Client[clientList.size()];
         for (int i = 0; i < clientList.size(); i++) {
-            clients[i] = clientList.get(i).getNomClient() + " " + clientList.get(i).getPrenomClient();
+            clients[i] = clientList.get(i);
         }
         userComboBox = new JComboBox<>(clients);
 
@@ -235,32 +235,32 @@ public class PizzeriaUI extends JFrame {
 
     public void Refresh() {
         List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
-        String[] pizzas = new String[pizzaList.size()];
+        Pizza[] pizzas = new Pizza[pizzaList.size()];
         for (int i = 0; i < pizzaList.size(); i++) {
-            pizzas[i] = pizzaList.get(i).getName();
+            pizzas[i] = pizzaList.get(i);
         }
         pizzaComboBox.removeAllItems();
-        for (String pizza : pizzas) {
+        for (Pizza pizza : pizzas) {
             pizzaComboBox.addItem(pizza);
         }
 
         List<Taille> tailleList = database.getTailles(); // Get sizes from database
-        String[] tailles = new String[tailleList.size()];
+        Taille[] tailles = new Taille[tailleList.size()];
         for (int i = 0; i < tailleList.size(); i++) {
-            tailles[i] = tailleList.get(i).getNomTaille();
+            tailles[i] = tailleList.get(i);
         }
         sizeComboBox.removeAllItems();
-        for (String taille : tailles) {
+        for (Taille taille : tailles) {
             sizeComboBox.addItem(taille);
         }
 
         List<Client> clientList = database.getClients(); // Get clients from database
-        String[] clients = new String[clientList.size()];
+        Client[] clients = new Client[clientList.size()];
         for (int i = 0; i < clientList.size(); i++) {
-            clients[i] = clientList.get(i).getNomClient() + " " + clientList.get(i).getPrenomClient();
+            clients[i] = clientList.get(i);
         }
         userComboBox.removeAllItems();
-        for (String client : clients) {
+        for (Client client : clients) {
             userComboBox.addItem(client);
         }
 
@@ -269,23 +269,19 @@ public class PizzeriaUI extends JFrame {
     }
 
     private void updatePizzaPrice(List<Pizza> pizzaList, List<Taille> tailleList) { 
-        String selectedPizza = (String) pizzaComboBox.getSelectedItem();
-        String selectedTaille = (String) sizeComboBox.getSelectedItem();
+        Pizza selectedPizza = (Pizza) pizzaComboBox.getSelectedItem();
+        Taille selectedTaille = (Taille) sizeComboBox.getSelectedItem();
 
-        float pizzaPrice = 0;
-        for (Pizza pizza : pizzaList) {
-            if (pizza.getName().equals(selectedPizza)) {
-                pizzaPrice = pizza.getPrice();
-                break;
-            }
+        float pizzaPrice;
+        float tailleMultiplicatif;
+
+        if(selectedPizza != null && selectedTaille != null) {
+            pizzaPrice = selectedPizza.getPrice();
+            tailleMultiplicatif = selectedTaille.getPrixMultiplicatif();
         }
-
-        float tailleMultiplicatif = 1;
-        for (Taille taille : tailleList) {
-            if (taille.getNomTaille().equals(selectedTaille)) {
-                tailleMultiplicatif = taille.getPrixMultiplicatif();
-                break;
-            }
+        else {
+            pizzaPrice = 0;
+            tailleMultiplicatif = 0;
         }
 
         finalPrice = Math.round(pizzaPrice * tailleMultiplicatif * 100) / 100.0f;
@@ -293,21 +289,17 @@ public class PizzeriaUI extends JFrame {
     }
 
     public void updateUserBalance(){
-        List<Client> clientList = database.getClients(); // Get clients from database
-        String selectedClient = (String) userComboBox.getSelectedItem();
-        for (Client client : clientList) {
-            if ((client.getNomClient() + " " + client.getPrenomClient()).equals(selectedClient)) {
-                database.refreshClientSolde(client);
-                userBalanceLabel.setText("Solde: " + client.getSolde() + " €");
-                database.setClient(client);
-                break;
-            }
+        Client selectedClient = (Client) userComboBox.getSelectedItem();
+        if(selectedClient != null) {
+            database.refreshClientSolde(selectedClient);
+            userBalanceLabel.setText("Solde: " + selectedClient.getSolde() + " €");
+            database.setClient(selectedClient);
         }
     }
 
     private void passOrder(Database database) {
-        String selectedPizza = (String) pizzaComboBox.getSelectedItem();
-        String selectedTaille = (String) sizeComboBox.getSelectedItem();
+        Pizza selectedPizza = (Pizza) pizzaComboBox.getSelectedItem();
+        Taille selectedTaille = (Taille) sizeComboBox.getSelectedItem();
 
         // ajouter dans la base de donnée la commande
         String orderString = database.addOrder(selectedPizza, selectedTaille, finalPrice);
@@ -340,14 +332,5 @@ public class PizzeriaUI extends JFrame {
             deliveryUI.refreshOrders();
         }
         //orderSummaryTextArea.setText(orderSummary.toString());
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                //new PizzeriaUI().setVisible(true);
-            }
-        });
     }
 }

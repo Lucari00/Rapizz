@@ -11,7 +11,7 @@ public class DeliveryUI extends JFrame {
     private DefaultListModel<String> orderListModel;
     private JList<String> orderList;
     private Order order;
-    private JComboBox<String> deliveryComboBox;
+    private JComboBox<Livreur> deliveryComboBox;
     private List<Livreur> livreurs;
 
     private boolean isRefreshing = false;
@@ -52,7 +52,7 @@ public class DeliveryUI extends JFrame {
         livreurs = database.getLivreurs();
 
         for (Livreur livreur : livreurs) {
-            deliveryComboBox.addItem(livreur.getLastNameLivreur() + " " + livreur.getNameLivreur());
+            deliveryComboBox.addItem(livreur);
         }
 
         // Disposer les composants dans un panneau
@@ -133,7 +133,7 @@ public class DeliveryUI extends JFrame {
         deliveryComboBox.removeAllItems();
         livreurs = database.getLivreurs();
         for (Livreur livreur : livreurs) {
-            deliveryComboBox.addItem(livreur.getLastNameLivreur() + " " + livreur.getNameLivreur());
+            deliveryComboBox.addItem(livreur);
         }
     }
 

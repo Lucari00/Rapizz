@@ -50,4 +50,9 @@ class Livreur {
     public String getNameLivreur() {
         return nameLivreur;
     }
+
+    @Override
+    public String toString() {
+        return this.lastNameLivreur + " " + this.nameLivreur;
+    }
 }
