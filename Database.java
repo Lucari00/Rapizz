@@ -330,7 +330,7 @@ public class Database {
                 return "noFunds";
             }
 
-            // Vérifier si le client a droit à une pizza gratuite tous les 10 commandes
+            // Vérifier si le client a droit à une pizza gratuite toutes les 10 commandes
             int nombreCommandes = getNombreCommandesByClient(client);
             if (nombreCommandes % 10 == 0 && nombreCommandes != 0) {
                 price = 0;
