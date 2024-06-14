@@ -4,6 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+/**
+ * Classe pour l'interface utilisateur de la pizzeria
+ * Permet de passer des commandes de pizzas pour chaque client
+ */
 public class PizzeriaUI extends JFrame {
 
     private JComboBox<Pizza> pizzaComboBox;
@@ -22,29 +26,32 @@ public class PizzeriaUI extends JFrame {
     private JButton viewIngredientsButton;
     private JButton addBalanceButton;
 
+    /**
+     * Constructeur de la classe PizzeriaUI
+     * @param database l'objet Database qui accède à la base de données
+     * @param mainPizzeriaUI l'objet MainPizzeriaUI qui gère toute l'interface
+     * @param commandManagerUI l'ojet PizzeriaManagerUI de l'interface du gérant
+     * @param deliveryUI l'ojet DeliveryUI de l'interface du livreur
+     */
     public PizzeriaUI(Database database, MainPizzeriaUI mainPizzeriaUI, PizzeriaManagerUI commandManagerUI, DeliveryUI deliveryUI) {
         this.database = database;
         this.commandManagerUI = commandManagerUI;
         this.deliveryUI = deliveryUI;
         this.mainPizzeriaUI = mainPizzeriaUI;
 
-        // Configurer la fenêtre principale
         setTitle("Pizzeria");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Créer les composants de l'interface utilisateur
-        List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
-        
-        // créer un tableau de chaînes pour stocker les noms des pizzas
+        List<Pizza> pizzaList = database.getPizzas();
         Pizza[] pizzas = new Pizza[pizzaList.size()];
         for (int i = 0; i < pizzaList.size(); i++) {
             pizzas[i] = pizzaList.get(i);
         }
         pizzaComboBox = new JComboBox<>(pizzas);
 
-        List<Taille> tailleList = database.getTailles(); // Get sizes from database
+        List<Taille> tailleList = database.getTailles();
         Taille[] tailles = new Taille[tailleList.size()];
         for (int i = 0; i < tailleList.size(); i++) {
             tailles[i] = tailleList.get(i);
@@ -52,7 +59,6 @@ public class PizzeriaUI extends JFrame {
         sizeComboBox = new JComboBox<>(tailles);
 
         JButton orderButton = new JButton("Passer commande");
-        // Ajouter des action listeners
         orderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -63,7 +69,7 @@ public class PizzeriaUI extends JFrame {
         pizzaPriceLabel = new JLabel("Prix: ");
         userBalanceLabel = new JLabel("Solde: ");
 
-        List<Client> clientList = database.getClients(); // Get clients from database
+        List<Client> clientList = database.getClients();
         Client[] clients = new Client[clientList.size()];
         for (int i = 0; i < clientList.size(); i++) {
             clients[i] = clientList.get(i);
@@ -76,14 +82,14 @@ public class PizzeriaUI extends JFrame {
         pizzaComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updatePizzaPrice(pizzaList, tailleList);
+                updatePizzaPrice();
             }
         });
 
         sizeComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updatePizzaPrice(pizzaList, tailleList);
+                updatePizzaPrice();
             }
         });
 
@@ -168,10 +174,13 @@ public class PizzeriaUI extends JFrame {
         // Ajouter le panneau à la fenêtre
         add(panel);
 
-        updatePizzaPrice(pizzaList, tailleList);
+        updatePizzaPrice();
         updateUserBalance();
     }
 
+    /**
+     * Procédure pour afficher une popup pour ajouter du solde à un client
+     */
     private void showAddBalancePopup() {
         String inputValue = JOptionPane.showInputDialog(mainPizzeriaUI, "Entrez le montant à ajouter:", "Ajouter au solde", JOptionPane.PLAIN_MESSAGE);
         if (inputValue != null) {
@@ -195,25 +204,13 @@ public class PizzeriaUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure pour afficher les ingrédients d'une pizza sélectionnée
+     */
     private void showIngredients() {
-        String selectedPizzaName = (String) pizzaComboBox.getSelectedItem();
-        if (selectedPizzaName == null) {
-            JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez sélectionner une pizza.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-    
-        // Rechercher l'objet Pizza correspondant au nom sélectionné
-        List<Pizza> pizzaList = database.getPizzas();
-        Pizza selectedPizza = null;
-        for (Pizza pizza : pizzaList) {
-            if (pizza.getName().equals(selectedPizzaName)) {
-                selectedPizza = pizza;
-                break;
-            }
-        }
-    
+        Pizza selectedPizza = (Pizza) pizzaComboBox.getSelectedItem();
         if (selectedPizza == null) {
-            JOptionPane.showMessageDialog(mainPizzeriaUI, "Pizza non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainPizzeriaUI, "Veuillez sélectionner une pizza.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
     
@@ -221,7 +218,7 @@ public class PizzeriaUI extends JFrame {
         List<String> ingredients = database.getIngredients(selectedPizza);
     
         // Construire le message des ingrédients
-        StringBuilder ingredientsMessage = new StringBuilder("Ingrédients de la pizza " + selectedPizzaName + ":\n");
+        StringBuilder ingredientsMessage = new StringBuilder("Ingrédients de la pizza " + selectedPizza + ":\n");
         for (String ingredient : ingredients) {
             ingredientsMessage.append("- ").append(ingredient).append("\n");
         }
@@ -230,11 +227,11 @@ public class PizzeriaUI extends JFrame {
         JOptionPane.showMessageDialog(mainPizzeriaUI, ingredientsMessage.toString(), "Ingrédients", JOptionPane.INFORMATION_MESSAGE);
     }
     
-       
-    
-
+    /**
+     * Procédure pour rafraîchir les données de l'interface client depuis la base de données
+     */
     public void Refresh() {
-        List<Pizza> pizzaList = database.getPizzas(); // Get pizzas from database
+        List<Pizza> pizzaList = database.getPizzas();
         Pizza[] pizzas = new Pizza[pizzaList.size()];
         for (int i = 0; i < pizzaList.size(); i++) {
             pizzas[i] = pizzaList.get(i);
@@ -244,7 +241,7 @@ public class PizzeriaUI extends JFrame {
             pizzaComboBox.addItem(pizza);
         }
 
-        List<Taille> tailleList = database.getTailles(); // Get sizes from database
+        List<Taille> tailleList = database.getTailles();
         Taille[] tailles = new Taille[tailleList.size()];
         for (int i = 0; i < tailleList.size(); i++) {
             tailles[i] = tailleList.get(i);
@@ -254,7 +251,7 @@ public class PizzeriaUI extends JFrame {
             sizeComboBox.addItem(taille);
         }
 
-        List<Client> clientList = database.getClients(); // Get clients from database
+        List<Client> clientList = database.getClients();
         Client[] clients = new Client[clientList.size()];
         for (int i = 0; i < clientList.size(); i++) {
             clients[i] = clientList.get(i);
@@ -264,11 +261,14 @@ public class PizzeriaUI extends JFrame {
             userComboBox.addItem(client);
         }
 
-        updatePizzaPrice(pizzaList, tailleList);
+        updatePizzaPrice();
         updateUserBalance();
     }
 
-    private void updatePizzaPrice(List<Pizza> pizzaList, List<Taille> tailleList) { 
+    /**
+     * Procédure pour mettre à jour le prix de la pizza en fonction de la taille sélectionnée
+     */
+    private void updatePizzaPrice() { 
         Pizza selectedPizza = (Pizza) pizzaComboBox.getSelectedItem();
         Taille selectedTaille = (Taille) sizeComboBox.getSelectedItem();
 
@@ -288,6 +288,9 @@ public class PizzeriaUI extends JFrame {
         pizzaPriceLabel.setText("Prix: " + finalPrice + " €");
     }
 
+    /**
+     * Procédure pour mettre à jour le solde de l'utilisateur sélectionné
+     */
     public void updateUserBalance(){
         Client selectedClient = (Client) userComboBox.getSelectedItem();
         if(selectedClient != null) {
@@ -297,6 +300,10 @@ public class PizzeriaUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure pour passer une commande
+     * @param database l'objet Database qui accède à la base de données
+     */
     private void passOrder(Database database) {
         Pizza selectedPizza = (Pizza) pizzaComboBox.getSelectedItem();
         Taille selectedTaille = (Taille) sizeComboBox.getSelectedItem();
@@ -331,6 +338,5 @@ public class PizzeriaUI extends JFrame {
             commandManagerUI.refreshOrders();
             deliveryUI.refreshOrders();
         }
-        //orderSummaryTextArea.setText(orderSummary.toString());
     }
 }

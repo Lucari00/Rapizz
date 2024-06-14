@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+/**
+ * Classe de l'interface graphique du gérant de la pizzeria.
+ */
 public class PizzeriaManagerUI extends JFrame {
     private DefaultListModel<String> orderListModel;
     private JList<String> orderList;
@@ -17,6 +20,10 @@ public class PizzeriaManagerUI extends JFrame {
 
     private Database database;
 
+    /**
+     * Constructeur de l'interface graphique du gérant de la pizzeria.
+     * @param database l'objet qui accède à la base de données de la pizzeria
+     */
     public PizzeriaManagerUI(Database database) {
         this.database = database;
         
@@ -48,6 +55,7 @@ public class PizzeriaManagerUI extends JFrame {
         orderDetailsTextArea = new JTextArea(10, 30);
         orderDetailsTextArea.setEditable(false);
 
+        // Bouton pour rafraîchir les commandes
         JButton refreshOrdersButton = new JButton("Rafraîchir les commandes");
         refreshOrdersButton.addActionListener(new ActionListener() {
             @Override
@@ -79,6 +87,9 @@ public class PizzeriaManagerUI extends JFrame {
         refreshDeliveredOrders();
     }
 
+    /**
+     * Procédure pour afficher les détails d'une commande livrée.
+     */
     private void showOrderDelivered() {
         int selectedIndex = secondList.getSelectedIndex();
         if (selectedIndex != -1) {
@@ -89,6 +100,9 @@ public class PizzeriaManagerUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure pour rafraîchir les commandes livrées.
+     */
     public void refreshDeliveredOrders() {
         ordersDelivered = database.getDeliveredOrders();
         secondListModel.clear();
@@ -97,6 +111,9 @@ public class PizzeriaManagerUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure pour afficher les détails d'une commande non livrée.
+     */
     private void showOrderDetails() {
         int selectedIndex = orderList.getSelectedIndex();
         if (selectedIndex != -1) {
@@ -107,6 +124,9 @@ public class PizzeriaManagerUI extends JFrame {
         }
     }
 
+    /**
+     * Procédure pour rafraîchir les commandes non livrées.
+     */
     public void refreshOrders() {
         ordersNotDelivered = database.getOrders();
         orderListModel.clear();

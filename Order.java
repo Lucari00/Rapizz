@@ -13,6 +13,9 @@ public class Order {
      * Prix de la commande
      */
     private float price;
+    /**
+     * Identifiant du livreur
+     */
     private int delivererId;
     /**
      * Identifiant du client
