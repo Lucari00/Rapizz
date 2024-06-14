@@ -147,7 +147,7 @@ public class Database {
 
             // Parcourir le résultat de la requête
             while (rset.next()) {
-                String id = rset.getString("idPizza");
+                int id = rset.getInt("idPizza");
                 String name = rset.getString("nomPizza");
                 float price = rset.getFloat("prixPizza");
 
@@ -334,7 +334,7 @@ public class Database {
                     idCommande = resultSet.getInt(1);
                 }
 
-                addPizzaCommande(Integer.parseInt(selectedPizza.getId()), selectedSize.getNomTaille(), idCommande);
+                addPizzaCommande(selectedPizza.getId(), selectedSize.getNomTaille(), idCommande);
 
                 updateClientSolde(client.getSolde() - price);
 
@@ -406,7 +406,7 @@ public class Database {
                        "WHERE ip.idPizza = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, pizza.getId());
+            statement.setInt(1, pizza.getId());
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {

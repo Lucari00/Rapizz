@@ -51,6 +51,10 @@ class Livreur {
         return nameLivreur;
     }
 
+    /** Méthode toString de la classe Livreur
+     * Redéfinition de la méthode toString de la classe Object pour afficher le nom et le prénom du livreur
+     * @return une chaîne de caractères représentant le nom et le prénom du livreur.
+     */
     @Override
     public String toString() {
         return this.lastNameLivreur + " " + this.nameLivreur;
