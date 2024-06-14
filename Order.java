@@ -1,9 +1,8 @@
+import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
 /**
  * Classe représentant une commande de pizza
  */
-import java.sql.Timestamp;
-import java.time.temporal.ChronoUnit;
-
 public class Order {
     /**
      * Identifiant de la commande
