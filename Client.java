@@ -25,11 +25,11 @@ public class Client {
 
     /**
      * Constructeur de la classe Client
-     * @param idClient : identifiant du client
-     * @param nomClient
-     * @param prenomClient
-     * @param adresseClient
-     * @param solde
+     * @param idClient identifiant du client
+     * @param nomClient nom du client
+     * @param prenomClient prénom du client
+     * @param adresseClient adresse du client
+     * @param solde solde du client
      */
     public Client(int idClient, String nomClient, String prenomClient, String adresseClient, float solde) {
         this.idClient = idClient;
