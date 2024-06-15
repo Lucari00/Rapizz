@@ -763,8 +763,8 @@ public class Database {
     public String getFavoriteIngredient() {
         String favoriteIngredient = "";
         String query = "SELECT i.nomIngredient, COUNT(ip.idIngredient) AS ingredient_count " +
-                       "FROM Ingredients i " +
-                       "JOIN IngredientPizza ip ON i.idIngredient = ip.idIngredient " +
+                       "FROM Ingredients i, IngredientPizza ip, PizzaCommande pc " +
+                       "WHERE i.idIngredient = ip.idIngredient AND ip.idPizza = pc.idPizza " +
                        "GROUP BY i.idIngredient " +
                        "ORDER BY ingredient_count DESC " +
                        "LIMIT 1";
